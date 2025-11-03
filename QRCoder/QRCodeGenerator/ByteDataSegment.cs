@@ -1,3 +1,6 @@
+using System.Text;
+using System.Collections;
+
 #if HAS_SPAN
 using System.Buffers;
 #endif

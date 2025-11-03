@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace QRCoder;
 
 public partial class QRCodeGenerator

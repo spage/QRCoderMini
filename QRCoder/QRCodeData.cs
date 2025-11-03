@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Collections;
 
 namespace QRCoder;
 
