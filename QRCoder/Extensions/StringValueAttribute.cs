@@ -39,16 +39,10 @@ public static class CustomExtensions
     /// <summary>
     /// Will get the string value for a given enum's value
     /// </summary>
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode("This method uses reflection to examine the provided enum value.")]
-#endif
     public static string? GetStringValue(this Enum value)
     {
-#if NETSTANDARD1_3
-        var fieldInfo = value.GetType().GetRuntimeField(value.ToString());
-#else
         var fieldInfo = value.GetType().GetField(value.ToString())!;
-#endif
         var attr = fieldInfo.GetCustomAttributes(typeof(StringValueAttribute), false) as StringValueAttribute[];
         return attr!.Length > 0 ? attr[0].StringValue : null;
     }

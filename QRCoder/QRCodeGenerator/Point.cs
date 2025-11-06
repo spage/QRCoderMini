@@ -47,10 +47,6 @@ public partial class QRCodeGenerator
 
         /// <inheritdoc/>
         public override int GetHashCode()
-#if NET5_0_OR_GREATER
             => HashCode.Combine(X, Y);
-#else
-            => X ^ (int)(((uint)Y << 16) | ((uint)Y >> 16));
-#endif
     }
 }
