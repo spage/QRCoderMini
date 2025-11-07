@@ -1,29 +1,24 @@
-﻿namespace QRCoder.Extensions;
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+
+namespace QRCoder.Extensions;
 
 /// <summary>
 /// Used to represent a string value for a value in an enum.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="StringValueAttribute"/> class.
+/// Init a StringValue Attribute.
+/// </remarks>
+/// <param name="value"></param>
 [Obsolete("This attribute will be removed in a future version of QRCoder.")]
 [AttributeUsage(AttributeTargets.Field)]
-public class StringValueAttribute : Attribute
+public class StringValueAttribute(string value) : Attribute
 {
     /// <summary>
     /// Gets or sets holds the alue in an enum.
     /// </summary>
-    public string StringValue { get; protected set; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="StringValueAttribute"/> class.
-    /// Init a StringValue Attribute.
-    /// </summary>
-    /// <param name="value"></param>
-    public StringValueAttribute(string value)
-    {
-        this.StringValue = value;
-    }
+    public string StringValue { get; protected set; } = value;
 }
 
 /// <summary>
@@ -39,7 +34,7 @@ public static class CustomExtensions
     [RequiresUnreferencedCode("This method uses reflection to examine the provided enum value.")]
     public static string? GetStringValue(this Enum value)
     {
-        var fieldInfo = value.GetType().GetField(value.ToString())!;
+        FieldInfo fieldInfo = value.GetType().GetField(value.ToString())!;
         var attr = fieldInfo.GetCustomAttributes(typeof(StringValueAttribute), false) as StringValueAttribute[];
         return attr!.Length > 0 ? attr[0].StringValue : null;
     }

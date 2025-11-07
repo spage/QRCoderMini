@@ -5,7 +5,7 @@ public partial class QRCodeGenerator
     /// <summary>
     /// Represents the error correction coding (ECC) information for a specific version and error correction level of a QR code.
     /// </summary>
-    private struct ECCInfo
+    private readonly struct ECCInfo
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ECCInfo"/> struct with specified properties.
@@ -21,15 +21,15 @@ public partial class QRCodeGenerator
         public ECCInfo(int version, ECCLevel errorCorrectionLevel, int totalDataCodewords, int eccPerBlock, int blocksInGroup1,
             int codewordsInGroup1, int blocksInGroup2, int codewordsInGroup2)
         {
-            this.Version = version;
-            this.ErrorCorrectionLevel = errorCorrectionLevel;
-            this.TotalDataCodewords = totalDataCodewords;
-            this.TotalDataBits = totalDataCodewords * 8;
-            this.ECCPerBlock = eccPerBlock;
-            this.BlocksInGroup1 = blocksInGroup1;
-            this.CodewordsInGroup1 = codewordsInGroup1;
-            this.BlocksInGroup2 = blocksInGroup2;
-            this.CodewordsInGroup2 = codewordsInGroup2;
+            Version = version;
+            ErrorCorrectionLevel = errorCorrectionLevel;
+            TotalDataCodewords = totalDataCodewords;
+            TotalDataBits = totalDataCodewords * 8;
+            ECCPerBlock = eccPerBlock;
+            BlocksInGroup1 = blocksInGroup1;
+            CodewordsInGroup1 = codewordsInGroup1;
+            BlocksInGroup2 = blocksInGroup2;
+            CodewordsInGroup2 = codewordsInGroup2;
         }
 
         /// <summary>
@@ -42,15 +42,15 @@ public partial class QRCodeGenerator
         /// <param name="eccPerBlock">The number of error correction codewords per block.</param>
         public ECCInfo(int version, ECCLevel errorCorrectionLevel, int totalDataCodewords, int totalDataBits, int eccPerBlock)
         {
-            this.Version = version;
-            this.ErrorCorrectionLevel = errorCorrectionLevel;
-            this.TotalDataCodewords = totalDataCodewords;
-            this.TotalDataBits = totalDataBits;
-            this.ECCPerBlock = eccPerBlock;
-            this.BlocksInGroup1 = 1;
-            this.CodewordsInGroup1 = totalDataCodewords;
-            this.BlocksInGroup2 = 0;
-            this.CodewordsInGroup2 = 0;
+            Version = version;
+            ErrorCorrectionLevel = errorCorrectionLevel;
+            TotalDataCodewords = totalDataCodewords;
+            TotalDataBits = totalDataBits;
+            ECCPerBlock = eccPerBlock;
+            BlocksInGroup1 = 1;
+            CodewordsInGroup1 = totalDataCodewords;
+            BlocksInGroup2 = 0;
+            CodewordsInGroup2 = 0;
         }
 
         /// <summary>
