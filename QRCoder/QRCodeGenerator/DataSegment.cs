@@ -1,32 +1,27 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
 
-using System.Collections;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
     /// <summary>
     /// Represents an abstract data segment for QR code encoding.
     /// </summary>
-    private abstract class DataSegment
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="DataSegment"/> class.
+    /// </remarks>
+    /// <param name="text">The text to encode.</param>
+    private abstract class DataSegment(string text)
     {
         /// <summary>
         /// Gets the text to encode.
         /// </summary>
-        public string Text { get; }
+        public string Text { get; } = text;
 
         /// <summary>
         /// Gets the encoding mode for this segment (Numeric, Alphanumeric, Byte, etc.)
         /// </summary>
         public abstract EncodingMode EncodingMode { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DataSegment"/> class.
-        /// </summary>
-        /// <param name="text">The text to encode.</param>
-        protected DataSegment(string text)
-        {
-            this.Text = text;
-        }
 
         /// <summary>
         /// Writes this data segment to an existing BitArray at the specified index for a specific QR code version.
@@ -45,8 +40,8 @@ public partial class QRCodeGenerator
         /// <returns>A BitArray containing the complete encoded segment.</returns>
         public BitArray ToBitArray(int version)
         {
-            var bitArray = new BitArray(this.GetBitLength(version));
-            this.WriteTo(bitArray, 0, version);
+            var bitArray = new BitArray(GetBitLength(version));
+            _ = WriteTo(bitArray, 0, version);
             return bitArray;
         }
 

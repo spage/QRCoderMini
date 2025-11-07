@@ -1,6 +1,6 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
 
-using System.Collections;
+namespace QRCoder.Extensions;
 
 /// <summary>
 /// Helper methods for <see cref="BitArray"/>.
@@ -18,7 +18,7 @@ internal static class BitArrayExtensions
     /// <returns>The index in the destination <see cref="BitArray"/> immediately following the last copied element.</returns>
     public static int CopyTo(this BitArray source, BitArray destination, int sourceOffset, int destinationOffset, int count)
     {
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
             destination[destinationOffset + i] = source[sourceOffset + i];
         }

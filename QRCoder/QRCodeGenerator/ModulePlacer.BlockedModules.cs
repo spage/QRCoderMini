@@ -1,6 +1,6 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
 
-using System.Collections;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -21,20 +21,20 @@ public partial class QRCodeGenerator
             /// <param name="size">The size of the blocked modules matrix.</param>
             public BlockedModules(int size)
             {
-                this.blockedModules = Interlocked.Exchange(ref staticBlockedModules, null)!;
-                if (this.blockedModules != null && this.blockedModules.Length >= size)
+                blockedModules = Interlocked.Exchange(ref staticBlockedModules, null)!;
+                if (blockedModules != null && blockedModules.Length >= size)
                 {
-                    for (int i = 0; i < size; i++)
+                    for (var i = 0; i < size; i++)
                     {
-                        this.blockedModules[i].SetAll(false);
+                        blockedModules[i].SetAll(false);
                     }
                 }
                 else
                 {
-                    this.blockedModules = new BitArray[size];
-                    for (int i = 0; i < size; i++)
+                    blockedModules = new BitArray[size];
+                    for (var i = 0; i < size; i++)
                     {
-                        this.blockedModules[i] = new BitArray(size);
+                        blockedModules[i] = new BitArray(size);
                     }
                 }
             }
@@ -44,20 +44,20 @@ public partial class QRCodeGenerator
             /// </summary>
             /// <param name="x">The x-coordinate of the module.</param>
             /// <param name="y">The y-coordinate of the module.</param>
-            public void Add(int x, int y)
-                => this.blockedModules[y][x] = true;
+            public readonly void Add(int x, int y)
+                => blockedModules[y][x] = true;
 
             /// <summary>
             /// Adds a blocked module defined by the specified rectangle.
             /// </summary>
             /// <param name="rect">The rectangle that defines the blocked module.</param>
-            public void Add(Rectangle rect)
+            public readonly void Add(Rectangle rect)
             {
-                for (int y = rect.Y; y < rect.Y + rect.Height; y++)
+                for (var y = rect.Y; y < rect.Y + rect.Height; y++)
                 {
-                    for (int x = rect.X; x < rect.X + rect.Width; x++)
+                    for (var x = rect.X; x < rect.X + rect.Width; x++)
                     {
-                        this.blockedModules[y][x] = true;
+                        blockedModules[y][x] = true;
                     }
                 }
             }
@@ -68,21 +68,21 @@ public partial class QRCodeGenerator
             /// <param name="x">The x-coordinate to check.</param>
             /// <param name="y">The y-coordinate to check.</param>
             /// <returns><c>true</c> if the coordinates are blocked; otherwise, <c>false</c>.</returns>
-            public bool IsBlocked(int x, int y)
-                => this.blockedModules[y][x];
+            public readonly bool IsBlocked(int x, int y)
+                => blockedModules[y][x];
 
             /// <summary>
             /// Checks if the specified rectangle is blocked.
             /// </summary>
             /// <param name="r1">The rectangle to check.</param>
             /// <returns><c>true</c> if the rectangle is blocked; otherwise, <c>false</c>.</returns>
-            public bool IsBlocked(Rectangle r1)
+            public readonly bool IsBlocked(Rectangle r1)
             {
-                for (int y = r1.Y; y < r1.Y + r1.Height; y++)
+                for (var y = r1.Y; y < r1.Y + r1.Height; y++)
                 {
-                    for (int x = r1.X; x < r1.X + r1.Width; x++)
+                    for (var x = r1.X; x < r1.X + r1.Width; x++)
                     {
-                        if (this.blockedModules[y][x])
+                        if (blockedModules[y][x])
                         {
                             return true;
                         }
@@ -92,8 +92,8 @@ public partial class QRCodeGenerator
                 return false;
             }
 
-            public void Dispose()
-                => Interlocked.CompareExchange(ref staticBlockedModules, this.blockedModules, null);
+            public readonly void Dispose()
+                => Interlocked.CompareExchange(ref staticBlockedModules, blockedModules, null);
         }
     }
 }

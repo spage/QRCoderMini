@@ -1,6 +1,6 @@
-﻿namespace QRCoder;
+﻿using System.Diagnostics;
 
-using System.Diagnostics;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -43,7 +43,10 @@ public partial class QRCodeGenerator
 
             return GaloisFieldByIntegerValue[intVal];
 
-            void ThrowIntValOutOfRangeException() => throw new ArgumentOutOfRangeException(nameof(intVal), "The provided integer value is out of range, as zero is not representable.");
+            static void ThrowIntValOutOfRangeException()
+            {
+                throw new ArgumentOutOfRangeException(nameof(intVal), "The provided integer value is out of range, as zero is not representable.");
+            }
         }
 
         /// <summary>

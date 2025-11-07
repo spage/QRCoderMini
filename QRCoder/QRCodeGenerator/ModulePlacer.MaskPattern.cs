@@ -1,4 +1,6 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
+
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -14,11 +16,10 @@ public partial class QRCodeGenerator
             /// A dictionary mapping each mask pattern index to its corresponding function that calculates whether a given pixel should be masked.
             /// </summary>
             public static readonly List<Func<int, int, bool>> Patterns =
-                new List<Func<int, int, bool>>(8)
-                {
-                    MaskPattern.Pattern1, MaskPattern.Pattern2, MaskPattern.Pattern3, MaskPattern.Pattern4,
-                    MaskPattern.Pattern5, MaskPattern.Pattern6, MaskPattern.Pattern7, MaskPattern.Pattern8,
-                };
+                [
+                    Pattern1, Pattern2, Pattern3, Pattern4,
+                    Pattern5, Pattern6, Pattern7, Pattern8,
+                ];
 
             /// <summary>
             /// Mask pattern 1: (x + y) % 2 == 0
@@ -60,21 +61,21 @@ public partial class QRCodeGenerator
             /// Applies a mask based on the product of x and y coordinates modulo 2 and 3.
             /// </summary>
             public static bool Pattern6(int x, int y)
-                => ((x * y) % 2) + ((x * y) % 3) == 0;
+                => (x * y % 2) + (x * y % 3) == 0;
 
             /// <summary>
             /// Mask pattern 7: (((x * y) % 2 + (x * y) % 3) % 2) == 0
             /// Applies a mask based on a more complex function involving the product of x and y coordinates.
             /// </summary>
             public static bool Pattern7(int x, int y)
-                => (((x * y) % 2) + ((x * y) % 3)) % 2 == 0;
+                => ((x * y % 2) + (x * y % 3)) % 2 == 0;
 
             /// <summary>
             /// Mask pattern 8: (((x + y) % 2) + ((x * y) % 3) % 2) == 0
             /// Combines rules of checkers and complex multiplicative masks.
             /// </summary>
             public static bool Pattern8(int x, int y)
-                => (((x + y) % 2) + ((x * y) % 3)) % 2 == 0;
+                => (((x + y) % 2) + (x * y % 3)) % 2 == 0;
 
             /// <summary>
             /// Calculates a penalty score for a Micro QR code to evaluate the effectiveness of a mask pattern.
@@ -84,10 +85,10 @@ public partial class QRCodeGenerator
             /// <returns>The total penalty score of the QR code.</returns>
             public static int ScoreMicro(QRCodeData qrCode)
             {
-                int size = qrCode.ModuleMatrix.Count;
-                int sum1 = 0;
-                int sum2 = 0;
-                for (int i = 1; i < size; i++)
+                var size = qrCode.ModuleMatrix.Count;
+                var sum1 = 0;
+                var sum2 = 0;
+                for (var i = 1; i < size; i++)
                 {
                     if (qrCode.ModuleMatrix[size - 1][i])
                     {
@@ -100,7 +101,7 @@ public partial class QRCodeGenerator
                     }
                 }
 
-                int total = sum1 < sum2 ? (sum1 * 16) + sum2 : (sum2 * 16) + sum1;
+                var total = sum1 < sum2 ? (sum1 * 16) + sum2 : (sum2 * 16) + sum1;
                 return -total; // negate so that lower is better
             }
 
@@ -115,8 +116,7 @@ public partial class QRCodeGenerator
             {
                 int score1 = 0,  // Penalty for groups of five or more same-color modules in a row (or column)
                     score2 = 0,  // Penalty for blocks of modules in the same color
-                    score3 = 0,  // Penalty for specific patterns found within the QR code
-                    score4 = 0;  // Penalty for having more than 50% black modules or more than 50% white modules
+                    score3 = 0;  // Penalty for having more than 50% black modules or more than 50% white modules
                 var size = qrCode.ModuleMatrix.Count;
 
                 // Penalty 1: Checking for consecutive modules of the same color in rows and columns
@@ -248,8 +248,8 @@ public partial class QRCodeGenerator
                 }
 
                 // Penalty 4: Proportions of dark and light modules
-                int blackModules = 0;
-                foreach (var bitArray in qrCode.ModuleMatrix)
+                var blackModules = 0;
+                foreach (BitArray bitArray in qrCode.ModuleMatrix)
                 {
                     for (var x = 0; x < size; x++)
                     {
@@ -263,10 +263,9 @@ public partial class QRCodeGenerator
                 var percentDiv5 = blackModules * 20 / (qrCode.ModuleMatrix.Count * qrCode.ModuleMatrix.Count);
                 var prevMultipleOf5 = Math.Abs(percentDiv5 - 10);
                 var nextMultipleOf5 = Math.Abs(percentDiv5 - 9);
-                score4 = Math.Min(prevMultipleOf5, nextMultipleOf5) * 10;
 
                 // Return the sum of all four penalties
-                return (score1 + score2) + (score3 + score4);
+                return score1 + score2 + score3 + (Math.Min(prevMultipleOf5, nextMultipleOf5) * 10);
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 
 namespace QRCoder.Extensions;
+
 internal static class StringExtensions
 {
     /// <summary>

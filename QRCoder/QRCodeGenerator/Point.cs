@@ -1,34 +1,28 @@
-﻿namespace QRCoder;
+﻿using System.Reflection;
 
-using System.Reflection;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
     /// <summary>
     /// Represents a 2D point with integer coordinates.
     /// </summary>
-    private readonly struct Point : IEquatable<Point>
+    /// <remarks>
+    /// Initializes a new instance of the <see cref="Point"/> struct with specified X and Y coordinates.
+    /// </remarks>
+    /// <param name="x">The X-coordinate of the point.</param>
+    /// <param name="y">The Y-coordinate of the point.</param>
+    private readonly struct Point(int x, int y) : IEquatable<Point>
     {
         /// <summary>
         /// Gets the X-coordinate of the point.
         /// </summary>
-        public int X { get; }
+        public int X { get; } = x;
 
         /// <summary>
         /// Gets the Y-coordinate of the point.
         /// </summary>
-        public int Y { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Point"/> struct with specified X and Y coordinates.
-        /// </summary>
-        /// <param name="x">The X-coordinate of the point.</param>
-        /// <param name="y">The Y-coordinate of the point.</param>
-        public Point(int x, int y)
-        {
-            this.X = x;
-            this.Y = y;
-        }
+        public int Y { get; } = y;
 
         /// <summary>
         /// Determines whether the specified <see cref="Point"/> is equal to the current <see cref="Point"/>.
@@ -40,13 +34,13 @@ public partial class QRCodeGenerator
         /// fall back to reflection, which causes heap allocations internally during the calls to <see cref="FieldInfo.GetValue(object)"/>.
         /// </remarks>
         public bool Equals(Point other)
-            => this.X == other.X && this.Y == other.Y;
+            => X == other.X && Y == other.Y;
 
         /// <inheritdoc/>
-        public override bool Equals(object? obj) => obj is Point point && this.Equals(point);
+        public override bool Equals(object? obj) => obj is Point point && Equals(point);
 
         /// <inheritdoc/>
         public override int GetHashCode()
-            => HashCode.Combine(this.X, this.Y);
+            => HashCode.Combine(X, Y);
     }
 }

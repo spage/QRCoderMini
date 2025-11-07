@@ -1,6 +1,6 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
 
-using System.Collections;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -122,7 +122,7 @@ public partial class QRCodeGenerator
         /// <returns>The index of the selected mask pattern.</returns>
         public static int MaskCode(QRCodeData qrCode, int version, BlockedModules blockedModules, ECCLevel eccLevel)
         {
-            int selectedPattern = -1;        // no pattern selected yet
+            var selectedPattern = -1;        // no pattern selected yet
             var patternScore = int.MaxValue; // lower score is better
 
             var size = qrCode.ModuleMatrix.Count - 8;
@@ -144,7 +144,7 @@ public partial class QRCodeGenerator
                     continue; // Micro QR codes only support certain mask patterns.
                 }
 
-                var patternFunc = MaskPattern.Patterns[maskPattern];
+                Func<int, int, bool> patternFunc = MaskPattern.Patterns[maskPattern];
 
                 // Reset the temporary QR code to the current state of the actual QR code.
                 for (var y = 0; y < size; y++)
@@ -157,12 +157,12 @@ public partial class QRCodeGenerator
 
                 // Place format information using the current mask pattern.
                 GetFormatString(formatStr, version, eccLevel, maskPattern);
-                ModulePlacer.PlaceFormat(qrTemp, formatStr, false);
+                PlaceFormat(qrTemp, formatStr, false);
 
                 // Place version information if applicable.
                 if (versionString != null) // aka if (version >= 7)
                 {
-                    ModulePlacer.PlaceVersion(qrTemp, versionString, false);
+                    PlaceVersion(qrTemp, versionString, false);
                 }
 
                 // Apply the mask pattern and calculate the score.
@@ -194,7 +194,7 @@ public partial class QRCodeGenerator
             }
 
             // Apply the best mask pattern to the actual QR code.
-            var selectedPatternFunc = MaskPattern.Patterns[selectedPattern];
+            Func<int, int, bool> selectedPatternFunc = MaskPattern.Patterns[selectedPattern];
             for (var x = 0; x < size; x++)
             {
                 for (var y = 0; y < x; y++)
@@ -241,7 +241,7 @@ public partial class QRCodeGenerator
                 for (var yMod = 1; yMod <= size; yMod++)
                 {
                     // Determine the actual y position based on the current fill direction.
-                    int y = up ? size - yMod : yMod - 1;
+                    var y = up ? size - yMod : yMod - 1;
 
                     // Place data if within data length and current position is not blocked.
                     if (index < count && !blockedModules.IsBlocked(x, y))
@@ -381,7 +381,7 @@ public partial class QRCodeGenerator
         public static void PlaceAlignmentPatterns(QRCodeData qrCode, List<Point> alignmentPatternLocations, BlockedModules blockedModules)
         {
             // Iterate through each specified location for alignment patterns.
-            foreach (var loc in alignmentPatternLocations)
+            foreach (Point loc in alignmentPatternLocations)
             {
                 // Define a 5x5 rectangle for the alignment pattern based on the center point provided.
                 var alignmentPatternRect = new Rectangle(loc.X, loc.Y, 5, 5);

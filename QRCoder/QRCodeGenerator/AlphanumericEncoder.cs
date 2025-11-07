@@ -1,6 +1,6 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
 
-using System.Collections;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -129,10 +129,7 @@ public partial class QRCodeGenerator
         /// </summary>
         /// <param name="textLength">The length of the alphanumeric text to be encoded.</param>
         /// <returns>The number of bits required to encode the text.</returns>
-        public static int GetBitLength(int textLength)
-        {
-            return ((textLength / 2) * 11) + ((textLength & 1) * 6);
-        }
+        public static int GetBitLength(int textLength) => (textLength / 2 * 11) + ((textLength & 1) * 6);
 
         /// <summary>
         /// Converts alphanumeric plain text into a binary format optimized for QR codes.
@@ -144,7 +141,7 @@ public partial class QRCodeGenerator
         public static BitArray GetBitArray(string plainText)
         {
             var codeText = new BitArray(GetBitLength(plainText.Length));
-            WriteToBitArray(plainText, 0, plainText.Length, codeText, 0);
+            _ = WriteToBitArray(plainText, 0, plainText.Length, codeText, 0);
             return codeText;
         }
 

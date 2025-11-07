@@ -1,13 +1,13 @@
-﻿namespace QRCoder;
+﻿using System.Collections;
 
-using System.Collections;
+namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
     /// <summary>
     /// Data segment optimized for alphanumeric data encoding.
     /// </summary>
-    private sealed class AlphanumericDataSegment : DataSegment
+    private sealed class AlphanumericDataSegment(string alphanumericText) : DataSegment(alphanumericText)
     {
         /// <summary>
         /// Gets the encoding mode (always Alphanumeric).
@@ -15,23 +15,11 @@ public partial class QRCodeGenerator
         public override EncodingMode EncodingMode => EncodingMode.Alphanumeric;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AlphanumericDataSegment"/> class.
-        /// </summary>
-        /// <param name="alphanumericText">The alphanumeric text to encode.</param>
-        public AlphanumericDataSegment(string alphanumericText)
-            : base(alphanumericText)
-        {
-        }
-
-        /// <summary>
         /// Calculates the total bit length for this segment when encoded for a specific QR code version.
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The total number of bits required for this segment.</returns>
-        public override int GetBitLength(int version)
-        {
-            return GetBitLength(this.Text.Length, version);
-        }
+        public override int GetBitLength(int version) => GetBitLength(Text.Length, version);
 
         /// <summary>
         /// Calculates the total bit length for encoding alphanumeric text of a given length for a specific QR code version.
@@ -42,10 +30,10 @@ public partial class QRCodeGenerator
         /// <returns>The total number of bits required.</returns>
         public static int GetBitLength(int textLength, int version)
         {
-            int modeIndicatorLength = 4;
-            int countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
-            int dataLength = AlphanumericEncoder.GetBitLength(textLength);
-            int length = modeIndicatorLength + countIndicatorLength + dataLength;
+            var modeIndicatorLength = 4;
+            var countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
+            var dataLength = AlphanumericEncoder.GetBitLength(textLength);
+            var length = modeIndicatorLength + countIndicatorLength + dataLength;
 
             return length;
         }
@@ -57,10 +45,7 @@ public partial class QRCodeGenerator
         /// <param name="startIndex">The starting index in the BitArray.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The next index in the BitArray after the last bit written.</returns>
-        public override int WriteTo(BitArray bitArray, int startIndex, int version)
-        {
-            return WriteTo(this.Text, 0, this.Text.Length, bitArray, startIndex, version);
-        }
+        public override int WriteTo(BitArray bitArray, int startIndex, int version) => WriteTo(Text, 0, Text.Length, bitArray, startIndex, version);
 
         /// <summary>
         /// Writes a portion of alphanumeric text to a BitArray at the specified index.
@@ -79,7 +64,7 @@ public partial class QRCodeGenerator
             bitIndex = DecToBin((int)EncodingMode.Alphanumeric, 4, bitArray, bitIndex);
 
             // write count indicator
-            int countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
+            var countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
             bitIndex = DecToBin(length, countIndicatorLength, bitArray, bitIndex);
 
             // write data - encode alphanumeric text
