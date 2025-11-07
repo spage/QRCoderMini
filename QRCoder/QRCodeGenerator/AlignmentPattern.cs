@@ -1,4 +1,4 @@
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {

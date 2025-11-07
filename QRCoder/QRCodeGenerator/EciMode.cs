@@ -1,4 +1,4 @@
-#pragma warning disable CA1707 // Underscore in identifier
+﻿#pragma warning disable CA1707 // Underscore in identifier
 
 namespace QRCoder;
 
@@ -32,6 +32,6 @@ public partial class QRCodeGenerator
         /// Specifies the use of UTF-8 encoding.
         /// UTF-8 can encode any Unicode character and is useful for QR codes that need to support multi-language content.
         /// </summary>
-        Utf8 = 26
+        Utf8 = 26,
     }
 }

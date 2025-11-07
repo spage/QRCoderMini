@@ -1,8 +1,8 @@
-using System.Text;
-using System.Collections;
-using System.Buffers;
+﻿namespace QRCoder;
 
-namespace QRCoder;
+using System.Buffers;
+using System.Collections;
+using System.Text;
 
 public partial class QRCodeGenerator
 {
@@ -12,55 +12,55 @@ public partial class QRCodeGenerator
     private sealed class ByteDataSegment : DataSegment
     {
         /// <summary>
-        /// Whether to force UTF-8 encoding
+        /// Gets a value indicating whether whether to force UTF-8 encoding.
         /// </summary>
         public bool ForceUtf8 { get; }
 
         /// <summary>
-        /// Whether to include UTF-8 BOM
+        /// Gets a value indicating whether whether to include UTF-8 BOM.
         /// </summary>
         public bool Utf8BOM { get; }
 
         /// <summary>
-        /// The ECI mode to use
+        /// Gets the ECI mode to use.
         /// </summary>
         public EciMode EciMode { get; }
 
         /// <summary>
-        /// Whether this segment includes an ECI mode indicator
+        /// Gets a value indicating whether whether this segment includes an ECI mode indicator.
         /// </summary>
-        public bool HasEciMode => EciMode != EciMode.Default;
+        public bool HasEciMode => this.EciMode != EciMode.Default;
 
         /// <summary>
-        /// Gets the encoding mode (always Byte)
+        /// Gets the encoding mode (always Byte).
         /// </summary>
         public override EncodingMode EncodingMode => EncodingMode.Byte;
 
         /// <summary>
-        /// Initializes a new instance of the ByteDataSegment class.
+        /// Initializes a new instance of the <see cref="ByteDataSegment"/> class.
         /// </summary>
-        /// <param name="text">The text to encode</param>
-        /// <param name="forceUtf8">Whether to force UTF-8 encoding</param>
-        /// <param name="utf8BOM">Whether to include UTF-8 BOM</param>
-        /// <param name="eciMode">The ECI mode to use</param>
+        /// <param name="text">The text to encode.</param>
+        /// <param name="forceUtf8">Whether to force UTF-8 encoding.</param>
+        /// <param name="utf8BOM">Whether to include UTF-8 BOM.</param>
+        /// <param name="eciMode">The ECI mode to use.</param>
         public ByteDataSegment(string text, bool forceUtf8, bool utf8BOM, EciMode eciMode)
             : base(text)
         {
-            ForceUtf8 = forceUtf8;
-            Utf8BOM = utf8BOM;
-            EciMode = eciMode;
+            this.ForceUtf8 = forceUtf8;
+            this.Utf8BOM = utf8BOM;
+            this.EciMode = eciMode;
         }
 
         /// <summary>
         /// Calculates the total bit length for this segment when encoded for a specific QR code version.
         /// </summary>
-        /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR)</param>
-        /// <returns>The total number of bits required for this segment</returns>
+        /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
+        /// <returns>The total number of bits required for this segment.</returns>
         public override int GetBitLength(int version)
         {
-            int modeIndicatorLength = HasEciMode ? 16 : 4;
+            int modeIndicatorLength = this.HasEciMode ? 16 : 4;
             int countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Byte);
-            int dataBitLength = GetPlainTextToBinaryByteBitLength(Text, EciMode, Utf8BOM, ForceUtf8);
+            int dataBitLength = GetPlainTextToBinaryByteBitLength(this.Text, this.EciMode, this.Utf8BOM, this.ForceUtf8);
             int length = modeIndicatorLength + countIndicatorLength + dataBitLength;
 
             return length;
@@ -69,40 +69,41 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Writes this data segment to an existing BitArray at the specified index.
         /// </summary>
-        /// <param name="bitArray">The target BitArray to write to</param>
-        /// <param name="startIndex">The starting index in the BitArray</param>
-        /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR)</param>
-        /// <returns>The next index in the BitArray after the last bit written</returns>
+        /// <param name="bitArray">The target BitArray to write to.</param>
+        /// <param name="startIndex">The starting index in the BitArray.</param>
+        /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
+        /// <returns>The next index in the BitArray after the last bit written.</returns>
         public override int WriteTo(BitArray bitArray, int startIndex, int version)
         {
             var index = startIndex;
 
             // write eci mode if present
-            if (HasEciMode)
+            if (this.HasEciMode)
             {
                 index = DecToBin((int)EncodingMode.ECI, 4, bitArray, index);
-                index = DecToBin((int)EciMode, 8, bitArray, index);
+                index = DecToBin((int)this.EciMode, 8, bitArray, index);
             }
 
             // write mode indicator
             index = DecToBin((int)EncodingMode.Byte, 4, bitArray, index);
 
             // write count indicator
-            int dataBitLength = GetPlainTextToBinaryByteBitLength(Text, EciMode, Utf8BOM, ForceUtf8);
+            int dataBitLength = GetPlainTextToBinaryByteBitLength(this.Text, this.EciMode, this.Utf8BOM, this.ForceUtf8);
             int characterCount = dataBitLength / 8;
             int countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Byte);
             index = DecToBin(characterCount, countIndicatorLength, bitArray, index);
 
             // write data directly to the bit array
-            index = PlainTextToBinaryByte(Text, EciMode, Utf8BOM, ForceUtf8, bitArray, index);
+            index = PlainTextToBinaryByte(this.Text, this.EciMode, this.Utf8BOM, this.ForceUtf8, bitArray, index);
 
             return index;
         }
     }
 
-    private static readonly Encoding _iso8859_1 =
+    private static readonly Encoding iso8859_1 =
         Encoding.Latin1;
-    private static Encoding? _iso8859_2;
+
+    private static Encoding? iso8859_2;
 
     /// <summary>
     /// Determines the target encoding for the given text and encoding parameters.
@@ -120,7 +121,7 @@ public partial class QRCodeGenerator
         // Check if the text is valid ISO-8859-1 and UTF-8 is not forced, then encode using ISO-8859-1.
         if (eciMode == EciMode.Default && !forceUtf8 && IsValidISO(plainText))
         {
-            targetEncoding = _iso8859_1;
+            targetEncoding = iso8859_1;
             includeUtf8BOM = false;
         }
         else
@@ -130,7 +131,7 @@ public partial class QRCodeGenerator
             {
                 case EciMode.Iso8859_1:
                     // Convert text to ISO-8859-1 and encode.
-                    targetEncoding = _iso8859_1;
+                    targetEncoding = iso8859_1;
                     includeUtf8BOM = false;
                     break;
                 case EciMode.Iso8859_2:
@@ -138,9 +139,10 @@ public partial class QRCodeGenerator
                     //
                     // Users must install the System.Text.Encoding.CodePages package and call Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
                     // before using this encoding mode.
-                    _iso8859_2 ??= Encoding.GetEncoding(28592); // ISO-8859-2
+                    iso8859_2 ??= Encoding.GetEncoding(28592); // ISO-8859-2
+
                     // Convert text to ISO-8859-2 and encode.
-                    targetEncoding = _iso8859_2;
+                    targetEncoding = iso8859_2;
                     includeUtf8BOM = false;
                     break;
                 case EciMode.Default:
@@ -217,11 +219,10 @@ public partial class QRCodeGenerator
         int count = targetEncoding.GetByteCount(plainText);
         byte[]? bufferFromPool = null;
         Span<byte> codeBytes = (count <= MAX_STACK_SIZE_IN_BYTES)
-            ? (stackalloc byte[MAX_STACK_SIZE_IN_BYTES])
+            ? stackalloc byte[MAX_STACK_SIZE_IN_BYTES]
             : (bufferFromPool = ArrayPool<byte>.Shared.Rent(count));
         codeBytes = codeBytes.Slice(0, count);
         targetEncoding.GetBytes(plainText, codeBytes);
-
 
         // Write the data to the BitArray
         if (includeUtf8BOM)
@@ -232,11 +233,14 @@ public partial class QRCodeGenerator
             DecToBin(0xBF, 8, bitArray, offset + 16);
             offset += 24;
         }
+
         CopyToBitArray(codeBytes, bitArray, offset);
         offset += (int)((uint)codeBytes.Length * 8);
 
         if (bufferFromPool != null)
+        {
             ArrayPool<byte>.Shared.Return(bufferFromPool);
+        }
 
         return offset;
     }

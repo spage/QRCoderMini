@@ -1,0 +1,56 @@
+# Top-most EditorConfig file
+root = true
+
+[*.{cs}]
+charset = utf-8-bom
+end_of_line = crlf
+insert_final_newline = true
+
+##########################################################
+# Analyzer severity and general code-style choices
+##########################################################
+# Make analyzer diagnostics appear as warnings by default
+dotnet_analyzer_diagnostic.severity = warning
+
+# Prefer var for built-in types and when type is apparent
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# Expression-bodied members where appropriate
+csharp_style_expression_bodied_methods = true:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+
+# Prefer file-scoped namespaces (modern style)
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Prefer inferred tuple names and local functions where applicable
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_local_over_anonymous_function = true:suggestion
+
+
+# Null-check and null-propagation preferences
+dotnet_style_null_propagation = true:suggestion
+
+# Prefer braces for all control blocks
+csharp_prefer_braces = true:warning
+
+# Prefer not to qualify members with 'this.' (Microsoft style)
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# Formatting: use four spaces
+indent_style = space
+indent_size = 4
+
+# Make a few common IDE rules warnings explicitly (optional)
+dotnet_diagnostic.IDE0044.severity = warning   # make readonly when possible
+dotnet_diagnostic.IDE0051.severity = warning   # remove unused private members
+dotnet_diagnostic.IDE0060.severity = warning   # remove unused parameters
+
+# Promote some Microsoft analyzer rules to warnings where helpful
+dotnet_diagnostic.CA1510.severity = warning    # prefer ArgumentNullException.ThrowIfNull
+
+# File header or license template can go here if you want

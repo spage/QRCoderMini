@@ -1,6 +1,6 @@
-using System.Collections;
+﻿namespace QRCoder;
 
-namespace QRCoder;
+using System.Collections;
 
 /// <summary>
 /// Helper methods for <see cref="BitArray"/>.
@@ -22,6 +22,7 @@ internal static class BitArrayExtensions
         {
             destination[destinationOffset + i] = source[sourceOffset + i];
         }
+
         return destinationOffset + count;
     }
 }

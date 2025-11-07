@@ -1,4 +1,4 @@
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -14,9 +14,10 @@ public partial class QRCodeGenerator
             /// A dictionary mapping each mask pattern index to its corresponding function that calculates whether a given pixel should be masked.
             /// </summary>
             public static readonly List<Func<int, int, bool>> Patterns =
-                new List<Func<int, int, bool>>(8) {
+                new List<Func<int, int, bool>>(8)
+                {
                     MaskPattern.Pattern1, MaskPattern.Pattern2, MaskPattern.Pattern3, MaskPattern.Pattern4,
-                    MaskPattern.Pattern5, MaskPattern.Pattern6, MaskPattern.Pattern7, MaskPattern.Pattern8
+                    MaskPattern.Pattern5, MaskPattern.Pattern6, MaskPattern.Pattern7, MaskPattern.Pattern8,
                 };
 
             /// <summary>
@@ -89,11 +90,17 @@ public partial class QRCodeGenerator
                 for (int i = 1; i < size; i++)
                 {
                     if (qrCode.ModuleMatrix[size - 1][i])
+                    {
                         sum1++;
+                    }
+
                     if (qrCode.ModuleMatrix[i][size - 1])
+                    {
                         sum2++;
+                    }
                 }
-                int total = sum1 < sum2 ? sum1 * 16 + sum2 : sum2 * 16 + sum1;
+
+                int total = sum1 < sum2 ? (sum1 * 16) + sum2 : (sum2 * 16) + sum1;
                 return -total; // negate so that lower is better
             }
 
@@ -112,7 +119,7 @@ public partial class QRCodeGenerator
                     score4 = 0;  // Penalty for having more than 50% black modules or more than 50% white modules
                 var size = qrCode.ModuleMatrix.Count;
 
-                //Penalty 1: Checking for consecutive modules of the same color in rows and columns
+                // Penalty 1: Checking for consecutive modules of the same color in rows and columns
                 for (var y = 0; y < size; y++)
                 {
                     var modInRow = 0;
@@ -123,29 +130,49 @@ public partial class QRCodeGenerator
                     {
                         // Check rows for consecutive modules
                         if (qrCode.ModuleMatrix[y][x] == lastValRow)
+                        {
                             modInRow++;
+                        }
                         else
+                        {
                             modInRow = 1;
+                        }
+
                         if (modInRow == 5)
+                        {
                             score1 += 3;
+                        }
                         else if (modInRow > 5)
+                        {
                             score1++;
+                        }
+
                         lastValRow = qrCode.ModuleMatrix[y][x];
 
                         // Check columns for consecutive modules
                         if (qrCode.ModuleMatrix[x][y] == lastValColumn)
+                        {
                             modInColumn++;
+                        }
                         else
+                        {
                             modInColumn = 1;
+                        }
+
                         if (modInColumn == 5)
+                        {
                             score1 += 3;
+                        }
                         else if (modInColumn > 5)
+                        {
                             score1++;
+                        }
+
                         lastValColumn = qrCode.ModuleMatrix[x][y];
                     }
                 }
 
-                //Penalty 2: Checking for blocks of modules in the same color
+                // Penalty 2: Checking for blocks of modules in the same color
                 for (var y = 0; y < size - 1; y++)
                 {
                     for (var x = 0; x < size - 1; x++)
@@ -153,11 +180,13 @@ public partial class QRCodeGenerator
                         if (qrCode.ModuleMatrix[y][x] == qrCode.ModuleMatrix[y][x + 1] &&
                             qrCode.ModuleMatrix[y][x] == qrCode.ModuleMatrix[y + 1][x] &&
                             qrCode.ModuleMatrix[y][x] == qrCode.ModuleMatrix[y + 1][x + 1])
+                        {
                             score2 += 3;
+                        }
                     }
                 }
 
-                //Penalty 3: Checking for specific patterns within the QR code (patterns that should be avoided)
+                // Penalty 3: Checking for specific patterns within the QR code (patterns that should be avoided)
                 for (var y = 0; y < size; y++)
                 {
                     for (var x = 0; x < size - 10; x++)
@@ -218,12 +247,18 @@ public partial class QRCodeGenerator
                     }
                 }
 
-                //Penalty 4: Proportions of dark and light modules
+                // Penalty 4: Proportions of dark and light modules
                 int blackModules = 0;
                 foreach (var bitArray in qrCode.ModuleMatrix)
+                {
                     for (var x = 0; x < size; x++)
+                    {
                         if (bitArray[x])
+                        {
                             blackModules++;
+                        }
+                    }
+                }
 
                 var percentDiv5 = blackModules * 20 / (qrCode.ModuleMatrix.Count * qrCode.ModuleMatrix.Count);
                 var prevMultipleOf5 = Math.Abs(percentDiv5 - 10);

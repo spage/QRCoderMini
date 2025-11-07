@@ -1,7 +1,7 @@
-using System.IO.Compression;
-using System.Collections;
+﻿namespace QRCoder;
 
-namespace QRCoder;
+using System.Collections;
+using System.IO.Compression;
 
 /// <summary>
 /// Represents the data structure of a QR code.
@@ -19,11 +19,13 @@ public class QRCodeData : IDisposable
     /// <param name="version">The version of the QR code.</param>
     public QRCodeData(int version)
     {
-        Version = version;
+        this.Version = version;
         var size = ModulesPerSideFromVersion(version);
-        ModuleMatrix = new List<BitArray>(size);
+        this.ModuleMatrix = new List<BitArray>(size);
         for (var i = 0; i < size; i++)
-            ModuleMatrix.Add(new BitArray(size));
+        {
+            this.ModuleMatrix.Add(new BitArray(size));
+        }
     }
 
     /// <summary>
@@ -33,11 +35,13 @@ public class QRCodeData : IDisposable
     /// <param name="addPadding">Indicates whether padding should be added to the QR code.</param>
     public QRCodeData(int version, bool addPadding)
     {
-        Version = version;
+        this.Version = version;
         var size = ModulesPerSideFromVersion(version) + (addPadding ? 8 : 0);
-        ModuleMatrix = new List<BitArray>(size);
+        this.ModuleMatrix = new List<BitArray>(size);
         for (var i = 0; i < size; i++)
-            ModuleMatrix.Add(new BitArray(size));
+        {
+            this.ModuleMatrix.Add(new BitArray(size));
+        }
     }
 
     /// <summary>
@@ -45,7 +49,8 @@ public class QRCodeData : IDisposable
     /// </summary>
     /// <param name="pathToRawData">The path to the raw data file.</param>
     /// <param name="compressMode">The compression mode used for the raw data.</param>
-    public QRCodeData(string pathToRawData, Compression compressMode) : this(File.ReadAllBytes(pathToRawData), compressMode)
+    public QRCodeData(string pathToRawData, Compression compressMode)
+        : this(File.ReadAllBytes(pathToRawData), compressMode)
     {
     }
 
@@ -56,7 +61,7 @@ public class QRCodeData : IDisposable
     /// <param name="compressMode">The compression mode used for the raw data.</param>
     public QRCodeData(byte[] rawData, Compression compressMode)
     {
-        //Decompress
+        // Decompress
         if (compressMode == Compression.Deflate)
         {
             using var input = new MemoryStream(rawData);
@@ -65,6 +70,7 @@ public class QRCodeData : IDisposable
             {
                 dstream.CopyTo(output);
             }
+
             rawData = output.ToArray();
         }
         else if (compressMode == Compression.GZip)
@@ -75,31 +81,43 @@ public class QRCodeData : IDisposable
             {
                 dstream.CopyTo(output);
             }
+
             rawData = output.ToArray();
         }
 
         if (rawData.Length < 5)
+        {
             throw new InvalidDataException("Invalid raw data file. File too short.");
+        }
+
         if (rawData[0] != 0x51 || rawData[1] != 0x52 || rawData[2] != 0x52)
+        {
             throw new InvalidDataException("Invalid raw data file. Filetype doesn't match \"QRR\".");
+        }
 
         // Set QR code version from side length (includes 8-module quiet zone)
         var sideLen = (int)rawData[4];
         if (sideLen < 29) // Micro QR: sideLen = 19 + 2*(m-1), m in [1..4] -> versions -1..-4
         {
             if (((sideLen - 19) & 1) != 0)
+            {
                 throw new InvalidDataException("Invalid raw data file. Side length not valid for Micro QR.");
+            }
+
             var m = ((sideLen - 19) / 2) + 1;
-            Version = -m;
+            this.Version = -m;
         }
         else // Standard QR: sideLen = 29 + 4*(v-1), v in [1..40]
         {
             if (((sideLen - 29) % 4) != 0)
+            {
                 throw new InvalidDataException("Invalid raw data file. Side length not valid for QR.");
-            Version = ((sideLen - 29) / 4) + 1;
+            }
+
+            this.Version = ((sideLen - 29) / 4) + 1;
         }
 
-        //Unpack
+        // Unpack
         var modules = new Queue<bool>(8 * (rawData.Length - 5));
         for (int j = 5; j < rawData.Length; j++)
         {
@@ -110,14 +128,14 @@ public class QRCodeData : IDisposable
             }
         }
 
-        //Build module matrix
-        ModuleMatrix = new List<BitArray>(sideLen);
+        // Build module matrix
+        this.ModuleMatrix = new List<BitArray>(sideLen);
         for (int y = 0; y < sideLen; y++)
         {
-            ModuleMatrix.Add(new BitArray(sideLen));
+            this.ModuleMatrix.Add(new BitArray(sideLen));
             for (int x = 0; x < sideLen; x++)
             {
-                ModuleMatrix[y][x] = modules.Dequeue();
+                this.ModuleMatrix[y][x] = modules.Dequeue();
             }
         }
     }
@@ -134,7 +152,7 @@ public class QRCodeData : IDisposable
         DeflateStream? deflateStream = null;
         GZipStream? gzipStream = null;
 
-        //Set up compression stream if needed
+        // Set up compression stream if needed
         if (compressMode == Compression.Deflate)
         {
             deflateStream = new DeflateStream(output, CompressionMode.Compress, true);
@@ -148,29 +166,30 @@ public class QRCodeData : IDisposable
 
         try
         {
-            //Add header - signature ("QRR")
+            // Add header - signature ("QRR")
             targetStream.Write([0x51, 0x52, 0x52, 0x00]);
 
-            //Add header - rowsize
-            targetStream.WriteByte((byte)ModuleMatrix.Count);
+            // Add header - rowsize
+            targetStream.WriteByte((byte)this.ModuleMatrix.Count);
 
-            //Build data queue
-            var capacity = ModuleMatrix.Count * ModuleMatrix.Count + 7; // Total modules + max padding for byte alignment
+            // Build data queue
+            var capacity = (this.ModuleMatrix.Count * this.ModuleMatrix.Count) + 7; // Total modules + max padding for byte alignment
             var dataQueue = new Queue<int>(capacity);
-            foreach (var row in ModuleMatrix)
+            foreach (var row in this.ModuleMatrix)
             {
                 for (int i = 0; i < row.Length; i++)
                 {
                     dataQueue.Enqueue(row[i] ? 1 : 0);
                 }
             }
-            int mod = (int)(((uint)ModuleMatrix.Count * (uint)ModuleMatrix.Count) % 8);
+
+            int mod = (int)(((uint)this.ModuleMatrix.Count * (uint)this.ModuleMatrix.Count) % 8);
             for (int i = 0; i < 8 - mod; i++)
             {
                 dataQueue.Enqueue(0);
             }
 
-            //Process queue
+            // Process queue
             while (dataQueue.Count > 0)
             {
                 byte b = 0;
@@ -178,12 +197,13 @@ public class QRCodeData : IDisposable
                 {
                     b += (byte)(dataQueue.Dequeue() << i);
                 }
+
                 targetStream.WriteByte(b);
             }
         }
         finally
         {
-            //Close compression streams to flush data
+            // Close compression streams to flush data
             deflateStream?.Dispose();
             gzipStream?.Dispose();
         }
@@ -197,7 +217,7 @@ public class QRCodeData : IDisposable
     /// <param name="filePath">The path to the file where the raw data will be saved.</param>
     /// <param name="compressMode">The compression mode used for the raw data.</param>
     public void SaveRawData(string filePath, Compression compressMode)
-        => File.WriteAllBytes(filePath, GetRawData(compressMode));
+        => File.WriteAllBytes(filePath, this.GetRawData(compressMode));
 
     /// <summary>
     /// Gets the version of the QR code.
@@ -211,16 +231,16 @@ public class QRCodeData : IDisposable
     /// <returns>Returns the number of modules per side.</returns>
     private static int ModulesPerSideFromVersion(int version)
         => version > 0
-            ? 21 + (version - 1) * 4
-            : 11 + (-version - 1) * 2;
+            ? 21 + ((version - 1) * 4)
+            : 11 + ((-version - 1) * 2);
 
     /// <summary>
     /// Releases all resources used by the <see cref="QRCodeData"/>.
     /// </summary>
     public virtual void Dispose()
     {
-        ModuleMatrix = null!;
-        Version = 0;
+        this.ModuleMatrix = null!;
+        this.Version = 0;
         GC.SuppressFinalize(this);
     }
 
@@ -233,13 +253,15 @@ public class QRCodeData : IDisposable
         /// No compression.
         /// </summary>
         Uncompressed,
+
         /// <summary>
         /// Deflate compression.
         /// </summary>
         Deflate,
+
         /// <summary>
         /// GZip compression.
         /// </summary>
-        GZip
+        GZip,
     }
 }

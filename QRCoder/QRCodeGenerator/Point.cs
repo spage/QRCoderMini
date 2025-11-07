@@ -1,6 +1,6 @@
-using System.Reflection;
+﻿namespace QRCoder;
 
-namespace QRCoder;
+using System.Reflection;
 
 public partial class QRCodeGenerator
 {
@@ -26,8 +26,8 @@ public partial class QRCodeGenerator
         /// <param name="y">The Y-coordinate of the point.</param>
         public Point(int x, int y)
         {
-            X = x;
-            Y = y;
+            this.X = x;
+            this.Y = y;
         }
 
         /// <summary>
@@ -40,13 +40,13 @@ public partial class QRCodeGenerator
         /// fall back to reflection, which causes heap allocations internally during the calls to <see cref="FieldInfo.GetValue(object)"/>.
         /// </remarks>
         public bool Equals(Point other)
-            => X == other.X && Y == other.Y;
+            => this.X == other.X && this.Y == other.Y;
 
         /// <inheritdoc/>
-        public override bool Equals(object? obj) => obj is Point point && Equals(point);
+        public override bool Equals(object? obj) => obj is Point point && this.Equals(point);
 
         /// <inheritdoc/>
         public override int GetHashCode()
-            => HashCode.Combine(X, Y);
+            => HashCode.Combine(this.X, this.Y);
     }
 }

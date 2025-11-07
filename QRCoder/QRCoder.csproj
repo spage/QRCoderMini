@@ -6,4 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- Enable .NET analyzers and set analysis level to latest to surface code-quality warnings -->
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!-- Rely on the SDK-provided .NET analyzers. Removing the explicit NuGet package so the SDK's analyzers are used. -->
+
 </Project>

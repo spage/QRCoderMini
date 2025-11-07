@@ -1,5 +1,6 @@
+﻿namespace QRCoder;
+
 using System.Collections;
-namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -10,28 +11,118 @@ public partial class QRCodeGenerator
     {
         // With C# 7.3 and later, this byte array is inlined into the assembly's read-only data section, improving performance and reducing memory usage.
         // See: https://devblogs.microsoft.com/dotnet/performance-improvements-in-net-core-3-0/
-        internal static ReadOnlySpan<byte> _map =>
+        internal static ReadOnlySpan<byte> Map =>
         [
+
             // 0..31
-            255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255,
-            255, 255, 255, 255, 255, 255, 255, 255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+
             // 32..47  (space, ! " # $ % & ' ( ) * + , - . /)
-            36, 255, 255, 255, 37, 38, 255, 255, 255, 255, 39, 40, 255, 41, 42, 43,
+            36,
+            255,
+            255,
+            255,
+            37,
+            38,
+            255,
+            255,
+            255,
+            255,
+            39,
+            40,
+            255,
+            41,
+            42,
+            43,
+
             // 48..57  (0..9)
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+
             // 58..64  (: ; < = > ? @)
-            44, 255, 255, 255, 255, 255, 255,
+            44,
+            255,
+            255,
+            255,
+            255,
+            255,
+            255,
+
             // 65..90  (A..Z)
-            10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35
+
             // (we don't index > 90)
         ];
 
         /// <summary>
         /// Checks if a character is present in the alphanumeric encoding table.
         /// </summary>
-        public static bool CanEncode(char c) => c <= 90 && _map[c] != 255;
+        /// <returns></returns>
+        public static bool CanEncode(char c) => c <= 90 && Map[c] != 255;
 
         /// <summary>
         /// Calculates the bit length required to encode alphanumeric text of a given length.
@@ -40,7 +131,7 @@ public partial class QRCodeGenerator
         /// <returns>The number of bits required to encode the text.</returns>
         public static int GetBitLength(int textLength)
         {
-            return (textLength / 2) * 11 + (textLength & 1) * 6;
+            return ((textLength / 2) * 11) + ((textLength & 1) * 6);
         }
 
         /// <summary>
@@ -74,7 +165,8 @@ public partial class QRCodeGenerator
             while (count >= 2)
             {
                 // Convert each pair of characters to a number by looking them up in the alphanumeric dictionary and calculating.
-                var dec = _map[plainText[index++]] * 45 + _map[plainText[index++]];
+                var dec = (Map[plainText[index++]] * 45) + Map[plainText[index++]];
+
                 // Convert the number to binary and store it in the BitArray.
                 codeIndex = DecToBin(dec, 11, codeText, codeIndex);
                 count -= 2;
@@ -83,7 +175,7 @@ public partial class QRCodeGenerator
             // Handle the last character if the length is odd.
             if (count > 0)
             {
-                codeIndex = DecToBin(_map[plainText[index]], 6, codeText, codeIndex);
+                codeIndex = DecToBin(Map[plainText[index]], 6, codeText, codeIndex);
             }
 
             return codeIndex;

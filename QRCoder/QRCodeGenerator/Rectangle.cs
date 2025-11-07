@@ -1,4 +1,4 @@
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -36,10 +36,10 @@ public partial class QRCodeGenerator
         /// <param name="h">The height of the rectangle.</param>
         public Rectangle(int x, int y, int w, int h)
         {
-            X = x;
-            Y = y;
-            Width = w;
-            Height = h;
+            this.X = x;
+            this.Y = y;
+            this.Width = w;
+            this.Height = h;
         }
     }
 }

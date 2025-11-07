@@ -1,4 +1,4 @@
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -10,12 +10,12 @@ public partial class QRCodeGenerator
         /// <summary>
         /// A lookup table mapping QR code versions to their corresponding alignment patterns.
         /// </summary>
-        private static readonly Dictionary<int, AlignmentPattern> _alignmentPatternTable = CreateAlignmentPatternTable();
+        private static readonly Dictionary<int, AlignmentPattern> alignmentPatternTable = CreateAlignmentPatternTable();
 
         /// <summary>
         /// Retrieves the alignment pattern for a specific QR code version.
         /// </summary>
-        public static AlignmentPattern FromVersion(int version) => _alignmentPatternTable[version];
+        public static AlignmentPattern FromVersion(int version) => alignmentPatternTable[version];
 
         /// <summary>
         /// Creates a lookup table mapping QR code versions to their corresponding alignment patterns.
@@ -41,7 +41,9 @@ public partial class QRCodeGenerator
                             {
                                 var p = new Point(alignmentPatternBaseValues[i + x] - 2, alignmentPatternBaseValues[i + y] - 2);
                                 if (!points.Contains(p))
+                                {
                                     points.Add(p);
+                                }
                             }
                         }
                     }
@@ -51,7 +53,7 @@ public partial class QRCodeGenerator
                 localAlignmentPatternTable.Add(version, new AlignmentPattern()
                 {
                     Version = version,
-                    PatternPositions = points
+                    PatternPositions = points,
                 });
             }
 
