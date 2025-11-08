@@ -53,4 +53,8 @@ dotnet_diagnostic.IDE0060.severity = warning   # remove unused parameters
 # Promote some Microsoft analyzer rules to warnings where helpful
 dotnet_diagnostic.CA1510.severity = warning    # prefer ArgumentNullException.ThrowIfNull
 
+# Suppress CA1707 (no underscores) for test files - underscores are conventional in test method names
+[**/*Tests.cs]
+dotnet_diagnostic.CA1707.severity = none
+
 # File header or license template can go here if you want
