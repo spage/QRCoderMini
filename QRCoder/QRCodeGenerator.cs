@@ -265,7 +265,7 @@ public partial class QRCodeGenerator : IDisposable
     };
 
     private static readonly BitArray repeatingPattern = new(
-        [true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, true]);
+        new bool[] { true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, true });
 
     /// <summary>
     /// Generates a QR code data structure using the provided BitArray, error correction level, and version.
@@ -490,9 +490,9 @@ public partial class QRCodeGenerator : IDisposable
         }
     }
 
-    private static readonly BitArray getFormatGenerator = new([true, false, true, false, false, true, true, false, true, true, true]);
-    private static readonly BitArray getFormatMask = new([true, false, true, false, true, false, false, false, false, false, true, false, false, true, false]);
-    private static readonly BitArray getFormatMicroMask = new([true, false, false, false, true, false, false, false, true, false, false, false, true, false, true]);
+    private static readonly BitArray getFormatGenerator = new(new bool[] { true, false, true, false, false, true, true, false, true, true, true });
+    private static readonly BitArray getFormatMask = new(new bool[] { true, false, true, false, true, false, false, false, false, false, true, false, false, true, false });
+    private static readonly BitArray getFormatMicroMask = new(new bool[] { true, false, false, false, true, false, false, false, true, false, false, false, true, false, true });
 
     /// <summary>
     /// Generates a BitArray containing the format string for a QR code based on the error correction level and mask pattern version.
@@ -639,7 +639,7 @@ public partial class QRCodeGenerator : IDisposable
 
     private static void ShiftAwayFromBit0(BitArray fStrEcc, int num) => _ = fStrEcc.LeftShift(num); // Shift away from bit 0
 
-    private static readonly BitArray getVersionGenerator = new([true, true, true, true, true, false, false, true, false, false, true, false, true]);
+    private static readonly BitArray getVersionGenerator = new(new bool[] { true, true, true, true, true, false, false, true, false, false, true, false, true });
 
     /// <summary>
     /// Encodes the version information of a QR code into a BitArray using error correction coding similar to format information encoding.
