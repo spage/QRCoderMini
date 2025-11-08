@@ -31,17 +31,17 @@ public partial class QRCodeGenerator
         /// <param name="startIndex">The starting index in the BitArray where writing should begin.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The next index in the BitArray after the last bit written.</returns>
-        public abstract int WriteTo(BitArray bitArray, int startIndex, int version);
+        public abstract int WriteTo(BitArray bitArray, int startIndex);
 
         /// <summary>
         /// Builds a complete BitArray from this data segment for a specific QR code version.
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>A BitArray containing the complete encoded segment.</returns>
-        public BitArray ToBitArray(int version)
+        public BitArray ToBitArray()
         {
-            var bitArray = new BitArray(GetBitLength(version));
-            _ = WriteTo(bitArray, 0, version);
+            var bitArray = new BitArray(GetBitLength());
+            _ = WriteTo(bitArray, 0);
             return bitArray;
         }
 
@@ -51,6 +51,6 @@ public partial class QRCodeGenerator
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The total number of bits required for this segment including mode indicator, count indicator, and data.</returns>
-        public abstract int GetBitLength(int version);
+        public abstract int GetBitLength();
     }
 }

@@ -66,7 +66,7 @@ public partial class QRCodeGenerator : IDisposable
         var version = 2;  //DetermineVersion(segment, eccLevel, requestedVersion);
 
         // Build the complete bit array for the determined version
-        var completeBitArray = segment.ToBitArray(version);
+        var completeBitArray = segment.ToBitArray();
         return GenerateQrCode(completeBitArray, eccLevel, version);
     }
 

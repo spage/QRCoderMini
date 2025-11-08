@@ -19,7 +19,7 @@ public partial class QRCodeGenerator
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The total number of bits required for this segment.</returns>
-        public override int GetBitLength(int version) => GetBitLength(Text.Length, version);
+        public override int GetBitLength() => GetBitLength(Text.Length);
 
         /// <summary>
         /// Calculates the total bit length for encoding alphanumeric text of a given length for a specific QR code version.
@@ -28,7 +28,7 @@ public partial class QRCodeGenerator
         /// <param name="textLength">The length of the alphanumeric text.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The total number of bits required.</returns>
-        public static int GetBitLength(int textLength, int version)
+        public static int GetBitLength(int textLength)
         {
             var modeIndicatorLength = 4;
             var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
@@ -45,7 +45,7 @@ public partial class QRCodeGenerator
         /// <param name="startIndex">The starting index in the BitArray.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The next index in the BitArray after the last bit written.</returns>
-        public override int WriteTo(BitArray bitArray, int startIndex, int version) => WriteTo(Text, 0, Text.Length, bitArray, startIndex, version);
+        public override int WriteTo(BitArray bitArray, int startIndex) => WriteTo(Text, 0, Text.Length, bitArray, startIndex);
 
         /// <summary>
         /// Writes a portion of alphanumeric text to a BitArray at the specified index.
@@ -58,7 +58,7 @@ public partial class QRCodeGenerator
         /// <param name="bitIndex">The starting index in the BitArray.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The next index in the BitArray after the last bit written.</returns>
-        public static int WriteTo(string text, int offset, int length, BitArray bitArray, int bitIndex, int version)
+        public static int WriteTo(string text, int offset, int length, BitArray bitArray, int bitIndex)
         {
             // write mode indicator
             bitIndex = DecToBin((int)EncodingMode.Alphanumeric, 4, bitArray, bitIndex);

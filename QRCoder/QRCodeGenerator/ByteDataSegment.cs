@@ -48,9 +48,9 @@ public partial class QRCodeGenerator
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The total number of bits required for this segment.</returns>
-        public override int GetBitLength(int version)
+        public override int GetBitLength()
         {
-            var modeIndicatorLength = HasEciMode ? 16 : 4;
+            var modeIndicatorLength = 4;
             var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Byte);
             var dataBitLength = GetPlainTextToBinaryByteBitLength(Text, EciMode, Utf8BOM, ForceUtf8);
             var length = modeIndicatorLength + countIndicatorLength + dataBitLength;
@@ -65,7 +65,7 @@ public partial class QRCodeGenerator
         /// <param name="startIndex">The starting index in the BitArray.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The next index in the BitArray after the last bit written.</returns>
-        public override int WriteTo(BitArray bitArray, int startIndex, int version)
+        public override int WriteTo(BitArray bitArray, int startIndex)
         {
             var index = startIndex;
 
