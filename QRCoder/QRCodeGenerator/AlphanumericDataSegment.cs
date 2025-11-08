@@ -31,7 +31,7 @@ public partial class QRCodeGenerator
         public static int GetBitLength(int textLength, int version)
         {
             var modeIndicatorLength = 4;
-            var countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
+            var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
             var dataLength = AlphanumericEncoder.GetBitLength(textLength);
             var length = modeIndicatorLength + countIndicatorLength + dataLength;
 
@@ -64,7 +64,7 @@ public partial class QRCodeGenerator
             bitIndex = DecToBin((int)EncodingMode.Alphanumeric, 4, bitArray, bitIndex);
 
             // write count indicator
-            var countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
+            var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Alphanumeric);
             bitIndex = DecToBin(length, countIndicatorLength, bitArray, bitIndex);
 
             // write data - encode alphanumeric text

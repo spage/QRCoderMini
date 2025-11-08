@@ -80,41 +80,40 @@ public partial class QRCodeGenerator
         /// <param name="encMode">The encoding mode (e.g., Numeric, Alphanumeric, Byte).</param>
         /// <param name="eccLevel">The error correction level (e.g., Low, Medium, Quartile, High).</param>
         /// <returns>The minimum version of the QR code that can accommodate the given data and settings.</returns>
-        /// <exception cref="Exceptions.DataTooLongException">
         /// Thrown when the data length exceeds the maximum capacity for the specified encoding mode and error correction level.
         /// </exception>
-        public static int CalculateMinimumVersion(int length, EncodingMode encMode, ECCLevel eccLevel)
-        {
-            // only iterates through non-micro QR codes
-            // capacity table is already sorted by version number ascending, so the smallest version that can hold the data is the first one found
-            foreach (VersionInfo x in capacityTable)
-            {
-                // find the requested ECC level and encoding mode in the capacity table
-                foreach (VersionInfoDetails y in x.Details)
-                {
-                    if (y.ErrorCorrectionLevel == eccLevel && y.CapacityDict[encMode] >= length)
-                    {
-                        // if the capacity of the current version is enough, return the version number
-                        return x.Version;
-                    }
-                }
-            }
+        // public static int CalculateMinimumVersion(int length, EncodingMode encMode, ECCLevel eccLevel)
+        // {
+        //     // only iterates through non-micro QR codes
+        //     // capacity table is already sorted by version number ascending, so the smallest version that can hold the data is the first one found
+        //     foreach (VersionInfo x in capacityTable)
+        //     {
+        //         // find the requested ECC level and encoding mode in the capacity table
+        //         foreach (VersionInfoDetails y in x.Details)
+        //         {
+        //             if (y.ErrorCorrectionLevel == eccLevel && y.CapacityDict[encMode] >= length)
+        //             {
+        //                 // if the capacity of the current version is enough, return the version number
+        //                 return x.Version;
+        //             }
+        //         }
+        //     }
 
-            // if no version was found, throw an exception
-            // In order to get the maxSizeByte we use a throw-helper method to avoid the allocation of a closure
-            Throw(encMode, eccLevel);
-            throw null!;    // this is needed to make the compiler happy
+        //     // if no version was found, throw an exception
+        //     // In order to get the maxSizeByte we use a throw-helper method to avoid the allocation of a closure
+        //     Throw(encMode, eccLevel);
+        //     throw null!;    // this is needed to make the compiler happy
 
-            static void Throw(EncodingMode encMode, ECCLevel eccLevel)
-            {
-                var maxSizeByte = capacityTable.Where(
-                    x => x.Details.Any(
-                        y => y.ErrorCorrectionLevel == eccLevel))
-                    .Max(x => x.Details.Single(y => y.ErrorCorrectionLevel == eccLevel).CapacityDict[encMode]);
+        //     static void Throw(EncodingMode encMode, ECCLevel eccLevel)
+        //     {
+        //         var maxSizeByte = capacityTable.Where(
+        //             x => x.Details.Any(
+        //                 y => y.ErrorCorrectionLevel == eccLevel))
+        //             .Max(x => x.Details.Single(y => y.ErrorCorrectionLevel == eccLevel).CapacityDict[encMode]);
 
-                throw new Exceptions.DataTooLongException(eccLevel.ToString(), encMode.ToString(), maxSizeByte);
-            }
-        }
+        //         throw new Exceptions.DataTooLongException(eccLevel.ToString(), encMode.ToString(), maxSizeByte);
+        //     }
+        // }
 
         /// <summary>
         /// Attempts to determine the minimum QR code version required to encode a data segment with a specific error correction level.
@@ -124,50 +123,50 @@ public partial class QRCodeGenerator
         /// <param name="eccLevel">The error correction level (e.g., Low, Medium, Quartile, High).</param>
         /// <param name="version">When this method returns, contains the minimum version number (1-40) that can accommodate the data segment if a suitable version was found; otherwise, 0.</param>
         /// <returns><see langword="true"/> if a suitable QR code version was found; otherwise, <see langword="false"/>.</returns>
-        public static bool TryCalculateMinimumVersion(DataSegment segment, ECCLevel eccLevel, out int version)
-        {
-            // Versions 1-9: Count indicator length is constant within this range
-            var segmentBitLength = segment.GetBitLength(1);
-            for (version = 1; version <= 9; version++)
-            {
-                ECCInfo eccInfo = GetEccInfo(version, eccLevel);
+        // public static bool TryCalculateMinimumVersion(DataSegment segment, ECCLevel eccLevel, out int version)
+        // {
+        //     // Versions 1-9: Count indicator length is constant within this range
+        //     var segmentBitLength = segment.GetBitLength(1);
+        //     for (version = 1; version <= 9; version++)
+        //     {
+        //         ECCInfo eccInfo = GetEccInfo(version, eccLevel);
 
-                // Check if this version has enough capacity for the segment's total bits
-                if (eccInfo.TotalDataBits >= segmentBitLength)
-                {
-                    return true;
-                }
-            }
+        //         // Check if this version has enough capacity for the segment's total bits
+        //         if (eccInfo.TotalDataBits >= segmentBitLength)
+        //         {
+        //             return true;
+        //         }
+        //     }
 
-            // Versions 10-26: Count indicator length is constant within this range
-            segmentBitLength = segment.GetBitLength(10);
-            for (version = 10; version <= 26; version++)
-            {
-                ECCInfo eccInfo = GetEccInfo(version, eccLevel);
+        //     // Versions 10-26: Count indicator length is constant within this range
+        //     segmentBitLength = segment.GetBitLength(10);
+        //     for (version = 10; version <= 26; version++)
+        //     {
+        //         ECCInfo eccInfo = GetEccInfo(version, eccLevel);
 
-                // Check if this version has enough capacity for the segment's total bits
-                if (eccInfo.TotalDataBits >= segmentBitLength)
-                {
-                    return true;
-                }
-            }
+        //         // Check if this version has enough capacity for the segment's total bits
+        //         if (eccInfo.TotalDataBits >= segmentBitLength)
+        //         {
+        //             return true;
+        //         }
+        //     }
 
-            // Versions 27-40: Count indicator length is constant within this range
-            segmentBitLength = segment.GetBitLength(27);
-            for (version = 27; version <= 40; version++)
-            {
-                ECCInfo eccInfo = GetEccInfo(version, eccLevel);
+        //     // Versions 27-40: Count indicator length is constant within this range
+        //     segmentBitLength = segment.GetBitLength(27);
+        //     for (version = 27; version <= 40; version++)
+        //     {
+        //         ECCInfo eccInfo = GetEccInfo(version, eccLevel);
 
-                // Check if this version has enough capacity for the segment's total bits
-                if (eccInfo.TotalDataBits >= segmentBitLength)
-                {
-                    return true;
-                }
-            }
+        //         // Check if this version has enough capacity for the segment's total bits
+        //         if (eccInfo.TotalDataBits >= segmentBitLength)
+        //         {
+        //             return true;
+        //         }
+        //     }
 
-            version = 0;
-            return false;
-        }
+        //     version = 0;
+        //     return false;
+        // }
 
         /// <summary>
         /// Determines the minimum Micro QR code version required to encode a given amount of data with a specific encoding mode and error correction level.
@@ -180,37 +179,37 @@ public partial class QRCodeGenerator
         /// <exception cref="Exceptions.DataTooLongException">
         /// Thrown when the data length exceeds the maximum capacity for the specified encoding mode and error correction level.
         /// </exception>
-        public static int CalculateMinimumMicroVersion(int length, EncodingMode encMode, ECCLevel eccLevel)
-        {
-            // only iterates through non-micro QR codes
-            // capacity table is already sorted by version number ascending, so the smallest version that can hold the data is the first one found
-            foreach (VersionInfo x in microCapacityTable)
-            {
-                // find the requested ECC level and encoding mode in the capacity table
-                foreach (VersionInfoDetails y in x.Details)
-                {
-                    // Use ECC level L for Micro QR Code versions 2, 3 and 4 when Default is specified
-                    if (y.ErrorCorrectionLevel == eccLevel || (eccLevel == ECCLevel.Default && y.ErrorCorrectionLevel == ECCLevel.L))
-                    {
-                        // Not all versions support all encoding modes, so check if the encoding mode is supported
-                        if (y.CapacityDict.TryGetValue(encMode, out var maxLength) && maxLength >= length)
-                        {
-                            // if the capacity of the current version is enough, return the version number
-                            return x.Version;
-                        }
-                    }
-                }
-            }
+        // public static int CalculateMinimumMicroVersion(int length, EncodingMode encMode, ECCLevel eccLevel)
+        // {
+        //     // only iterates through non-micro QR codes
+        //     // capacity table is already sorted by version number ascending, so the smallest version that can hold the data is the first one found
+        //     foreach (VersionInfo x in microCapacityTable)
+        //     {
+        //         // find the requested ECC level and encoding mode in the capacity table
+        //         foreach (VersionInfoDetails y in x.Details)
+        //         {
+        //             // Use ECC level L for Micro QR Code versions 2, 3 and 4 when Default is specified
+        //             if (y.ErrorCorrectionLevel == eccLevel || (eccLevel == ECCLevel.Default && y.ErrorCorrectionLevel == ECCLevel.L))
+        //             {
+        //                 // Not all versions support all encoding modes, so check if the encoding mode is supported
+        //                 if (y.CapacityDict.TryGetValue(encMode, out var maxLength) && maxLength >= length)
+        //                 {
+        //                     // if the capacity of the current version is enough, return the version number
+        //                     return x.Version;
+        //                 }
+        //             }
+        //         }
+        //     }
 
-            // if no version was found, throw an exception
-            var maxSizeByte = microCapacityTable
-                .SelectMany(x => x.Details)
-                .Where(y => (y.ErrorCorrectionLevel == eccLevel || (eccLevel == ECCLevel.Default && y.ErrorCorrectionLevel == ECCLevel.L))
-                    && y.CapacityDict.ContainsKey(encMode))
-                .Max(y => y.CapacityDict[encMode]);
+        //     // if no version was found, throw an exception
+        //     var maxSizeByte = microCapacityTable
+        //         .SelectMany(x => x.Details)
+        //         .Where(y => (y.ErrorCorrectionLevel == eccLevel || (eccLevel == ECCLevel.Default && y.ErrorCorrectionLevel == ECCLevel.L))
+        //             && y.CapacityDict.ContainsKey(encMode))
+        //         .Max(y => y.CapacityDict[encMode]);
 
-            throw new Exceptions.DataTooLongException(eccLevel.ToString(), encMode.ToString(), maxSizeByte);
-        }
+        //     throw new Exceptions.DataTooLongException(eccLevel.ToString(), encMode.ToString(), maxSizeByte);
+        // }
 
         /// <summary>
         /// Generates a table containing the error correction capacities and data codeword information for different QR code versions and error correction levels.

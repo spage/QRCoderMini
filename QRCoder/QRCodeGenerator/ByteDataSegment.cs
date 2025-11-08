@@ -51,7 +51,7 @@ public partial class QRCodeGenerator
         public override int GetBitLength(int version)
         {
             var modeIndicatorLength = HasEciMode ? 16 : 4;
-            var countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Byte);
+            var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Byte);
             var dataBitLength = GetPlainTextToBinaryByteBitLength(Text, EciMode, Utf8BOM, ForceUtf8);
             var length = modeIndicatorLength + countIndicatorLength + dataBitLength;
 
@@ -82,7 +82,7 @@ public partial class QRCodeGenerator
             // write count indicator
             var dataBitLength = GetPlainTextToBinaryByteBitLength(Text, EciMode, Utf8BOM, ForceUtf8);
             var characterCount = dataBitLength / 8;
-            var countIndicatorLength = GetCountIndicatorLength(version, EncodingMode.Byte);
+            var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Byte);
             index = DecToBin(characterCount, countIndicatorLength, bitArray, index);
 
             // write data directly to the bit array
@@ -108,46 +108,49 @@ public partial class QRCodeGenerator
     /// <returns>The encoding to use for the text.</returns>
     private static Encoding GetTargetEncoding(string plainText, EciMode eciMode, bool utf8BOM, bool forceUtf8, out bool includeUtf8BOM)
     {
-        Encoding targetEncoding;
+        // Encoding targetEncoding;
+        // targetEncoding = iso8859_1;
+        includeUtf8BOM = false;
+        return iso8859_1;
 
-        // Check if the text is valid ISO-8859-1 and UTF-8 is not forced, then encode using ISO-8859-1.
-        if (eciMode == EciMode.Default && !forceUtf8 && IsValidISO(plainText))
-        {
-            targetEncoding = iso8859_1;
-            includeUtf8BOM = false;
-        }
-        else
-        {
-            // Determine the encoding based on the specified ECI mode.
-            switch (eciMode)
-            {
-                case EciMode.Iso8859_1:
-                    // Convert text to ISO-8859-1 and encode.
-                    targetEncoding = iso8859_1;
-                    includeUtf8BOM = false;
-                    break;
-                case EciMode.Iso8859_2:
-                    // Note: ISO-8859-2 is not natively supported on .NET Core
-                    //
-                    // Users must install the System.Text.Encoding.CodePages package and call Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
-                    // before using this encoding mode.
-                    iso8859_2 ??= Encoding.GetEncoding(28592); // ISO-8859-2
+        // // Check if the text is valid ISO-8859-1 and UTF-8 is not forced, then encode using ISO-8859-1.
+        // if (eciMode == EciMode.Default && !forceUtf8 && IsValidISO(plainText))
+        // {
+        //     targetEncoding = iso8859_1;
+        //     includeUtf8BOM = false;
+        // }
+        // else
+        // {
+        //     // Determine the encoding based on the specified ECI mode.
+        //     switch (eciMode)
+        //     {
+        //         case EciMode.Iso8859_1:
+        //             // Convert text to ISO-8859-1 and encode.
+        //             targetEncoding = iso8859_1;
+        //             includeUtf8BOM = false;
+        //             break;
+        //         case EciMode.Iso8859_2:
+        //             // Note: ISO-8859-2 is not natively supported on .NET Core
+        //             //
+        //             // Users must install the System.Text.Encoding.CodePages package and call Encoding.RegisterProvider(CodePagesEncodingProvider.Instance)
+        //             // before using this encoding mode.
+        //             iso8859_2 ??= Encoding.GetEncoding(28592); // ISO-8859-2
 
-                    // Convert text to ISO-8859-2 and encode.
-                    targetEncoding = iso8859_2;
-                    includeUtf8BOM = false;
-                    break;
-                case EciMode.Default:
-                case EciMode.Utf8:
-                default:
-                    // Handle UTF-8 encoding, optionally adding a BOM if specified.
-                    targetEncoding = Encoding.UTF8;
-                    includeUtf8BOM = utf8BOM;
-                    break;
-            }
-        }
+        //             // Convert text to ISO-8859-2 and encode.
+        //             targetEncoding = iso8859_2;
+        //             includeUtf8BOM = false;
+        //             break;
+        //         case EciMode.Default:
+        //         case EciMode.Utf8:
+        //         default:
+        //             // Handle UTF-8 encoding, optionally adding a BOM if specified.
+        //             targetEncoding = Encoding.UTF8;
+        //             includeUtf8BOM = utf8BOM;
+        //             break;
+        //     }
+        // }
 
-        return targetEncoding;
+        //return targetEncoding;
     }
 
     /// <summary>
