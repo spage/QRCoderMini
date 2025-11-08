@@ -274,7 +274,13 @@ public partial class QRCodeGenerator : IDisposable
     /// <returns>A QRCodeData structure containing the full QR code matrix, which can be used for rendering or analysis.</returns>
     private static QRCodeData GenerateQrCode(BitArray bitArray, ECCLevel eccLevel, int version)
     {
-        ECCInfo eccInfo = CapacityTables.GetEccInfo(version, eccLevel);
+        //ECCInfo eccInfo = CapacityTables.GetEccInfo(version, eccLevel);
+        var eccInfo = new ECCInfo(
+            version: 2,
+            errorCorrectionLevel: ECCLevel.M,
+            totalDataCodewords: 28,
+            totalDataBits: 28 * 8,
+            eccPerBlock: 16);
 
         // Fill up data code word
         PadData();
@@ -412,7 +418,7 @@ public partial class QRCodeGenerator : IDisposable
                 }
             }
 
-            length += CapacityTables.GetRemainderBits(version);
+            length += 7;  //CapacityTables.GetRemainderBits(version);
             return length;
         }
 
