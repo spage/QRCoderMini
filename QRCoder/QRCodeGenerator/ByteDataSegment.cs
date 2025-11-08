@@ -95,7 +95,7 @@ public partial class QRCodeGenerator
     private static readonly Encoding iso8859_1 =
         Encoding.Latin1;
 
-    private static Encoding? iso8859_2;
+    //private static Encoding? iso8859_2;
 
     /// <summary>
     /// Determines the target encoding for the given text and encoding parameters.
