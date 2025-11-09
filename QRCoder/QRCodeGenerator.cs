@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using QRCoder.Extensions;
 
 namespace QRCoder;
 
@@ -439,10 +438,27 @@ public partial class QRCodeGenerator : IDisposable
                 {
                     if ((uint)codeBlock.CodeWordsLength / 8 > i)
                     {
-                        pos = bitArray.CopyTo(data, (int)((uint)i * 8) + codeBlock.CodeWordsOffset, pos, 8);
+                        //pos = bitArray.CopyTo(data, (int)((uint)i * 8) + codeBlock.CodeWordsOffset, pos, 8);
+                        for (var j = 0; j < 8; j++)
+                        {
+                            data[pos + j] = bitArray[(int)((uint)j * 8) + codeBlock.CodeWordsOffset + j];
+                        }
+                        pos += 8;
                     }
                 }
             }
+
+            /*
+            public static int CopyTo(this BitArray source, BitArray destination, int sourceOffset, int destinationOffset, int count)
+            {
+                for (var i = 0; i < 8; i++)
+                {
+                    data[pos + i] = source[(int)((uint)i * 8) + codeBlock.CodeWordsOffset + i];
+                }
+
+                return pos + 8;
+            }
+            */
 
             // if (version is (-1) or (-3))
             // {
