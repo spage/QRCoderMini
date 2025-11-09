@@ -33,10 +33,10 @@ public class QRCodeData : IDisposable
     /// </summary>
     /// <param name="version">The version of the QR code.</param>
     /// <param name="addPadding">Indicates whether padding should be added to the QR code.</param>
-    public QRCodeData(int version, bool addPadding)
+    public QRCodeData()
     {
-        Version = version;
-        var size = ModulesPerSideFromVersion(version) + (addPadding ? 8 : 0);
+        Version = 2;
+        var size = 25;  //ModulesPerSideFromVersion(version) + (addPadding ? 8 : 0);
         ModuleMatrix = new List<BitArray>(size);
         for (var i = 0; i < size; i++)
         {
@@ -230,10 +230,10 @@ public class QRCodeData : IDisposable
     /// </summary>
     /// <param name="version">The version of the QR code (1 to 40, or -1 to -4 for Micro QR codes).</param>
     /// <returns>Returns the number of modules per side.</returns>
-    private static int ModulesPerSideFromVersion(int version)
-        => version > 0
-            ? 21 + ((version - 1) * 4)
-            : 11 + ((-version - 1) * 2);
+    // private static int ModulesPerSideFromVersion(int version)
+    //     => version > 0
+    //         ? 21 + ((version - 1) * 4)
+    //         : 11 + ((-version - 1) * 2);
 
     /// <summary>
     /// Releases all resources used by the <see cref="QRCodeData"/>.

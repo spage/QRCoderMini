@@ -484,21 +484,22 @@ public partial class QRCodeGenerator : IDisposable
         // Place the modules on the QR code matrix
         QRCodeData PlaceModules()
         {
-            var qr = new QRCodeData(2, true);
-            var size = qr.ModuleMatrix.Count - 8;
+            // NOTE: qr HAS NO BORDER NOW
+            var qr = new QRCodeData();
+            var size = qr.ModuleMatrix.Count; // NO BOREDER ADJUST - 8;
             var tempBitArray = new BitArray(18); // version string requires 18 bits
             using (var blockedModules = new ModulePlacer.BlockedModules(size))
             {
                 ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
-                ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules);
+                ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules); //likely wrong
                 ModulePlacer.PlaceAlignmentPatterns(qr, AlignmentPatterns.alignmentPattern, blockedModules);
                 ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
                 ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
-                ModulePlacer.ReserveVersionAreas(size, 2, blockedModules);
+                ModulePlacer.ReserveVersionAreas(size, blockedModules);
                 ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
                 var maskVersion = ModulePlacer.MaskCode(qr, blockedModules);
                 GetFormatString(tempBitArray, 2, ECCLevel.M, maskVersion);
-                ModulePlacer.PlaceFormat(qr, tempBitArray, true);
+                ModulePlacer.PlaceFormat(qr, tempBitArray, false);
             }
 
             return qr;

@@ -125,10 +125,11 @@ public partial class QRCodeGenerator
             var selectedPattern = -1;        // no pattern selected yet
             var patternScore = int.MaxValue; // lower score is better
 
-            var size = qrCode.ModuleMatrix.Count - 8;
+            var size = qrCode.ModuleMatrix.Count;// - 8;
 
             // Temporary QRCodeData object to test different mask patterns without altering the original.
-            var qrTemp = new QRCodeData(2, false);
+            var qrTemp = new QRCodeData();
+            // NOTE: qrTemp NO BORDER
             BitArray? versionString = null;
             // if (version >= 7)
             // {
@@ -151,7 +152,7 @@ public partial class QRCodeGenerator
                 {
                     for (var x = 0; x < size; x++)
                     {
-                        qrTemp.ModuleMatrix[y][x] = qrCode.ModuleMatrix[y + 4][x + 4];
+                        qrTemp.ModuleMatrix[y][x] = qrCode.ModuleMatrix[y][x];  //[y + 4][x + 4];
                     }
                 }
 
@@ -202,14 +203,17 @@ public partial class QRCodeGenerator
                 {
                     if (!blockedModules.IsBlocked(x, y))
                     {
-                        qrCode.ModuleMatrix[y + 4][x + 4] ^= selectedPatternFunc(x, y);
-                        qrCode.ModuleMatrix[x + 4][y + 4] ^= selectedPatternFunc(y, x);
+                        // qrCode.ModuleMatrix[y + 4][x + 4] ^= selectedPatternFunc(x, y);
+                        // qrCode.ModuleMatrix[x + 4][y + 4] ^= selectedPatternFunc(y, x);
+                        qrCode.ModuleMatrix[y][x] ^= selectedPatternFunc(x, y);
+                        qrCode.ModuleMatrix[x][y] ^= selectedPatternFunc(y, x);
                     }
                 }
 
                 if (!blockedModules.IsBlocked(x, x))
                 {
-                    qrCode.ModuleMatrix[x + 4][x + 4] ^= selectedPatternFunc(x, x);
+                    //qrCode.ModuleMatrix[x + 4][x + 4] ^= selectedPatternFunc(x, x);
+                    qrCode.ModuleMatrix[x][x] ^= selectedPatternFunc(x, x);
                 }
             }
 
@@ -224,7 +228,7 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">A list of rectangles representing areas within the QR code matrix that should not be modified because they contain other necessary information like format and version info.</param>
         public static void PlaceDataWords(QRCodeData qrCode, BitArray data, BlockedModules blockedModules)
         {
-            var size = qrCode.ModuleMatrix.Count - 8; // Get the size of the QR code matrix.
+            var size = qrCode.ModuleMatrix.Count;// - 8; // Get the size of the QR code matrix.
             var up = true; // A boolean flag used to alternate the direction of filling data: up or down.
             var index = 0; // Index to track the current bit position in the data BitArray.
             var count = data.Length; // Total number of data bits to place.
@@ -247,12 +251,15 @@ public partial class QRCodeGenerator
                     // Place data if within data length and current position is not blocked.
                     if (index < count && !blockedModules.IsBlocked(x, y))
                     {
-                        qrCode.ModuleMatrix[y + 4][x + 4] = data[index++];
+                        qrCode.ModuleMatrix[y][x] = data[index++];
+                        //qrCode.ModuleMatrix[y + 4][x + 4] = data[index++];
                     }
 
                     if (index < count && x > 0 && !blockedModules.IsBlocked(x - 1, y))
                     {
-                        qrCode.ModuleMatrix[y + 4][x - 1 + 4] = data[index++];
+                        //qrCode.ModuleMatrix[y + 4][x - 1 + 4] = data[index++];
+                        qrCode.ModuleMatrix[y][x - 1] = data[index++];
+
                     }
                 }
 
@@ -291,7 +298,7 @@ public partial class QRCodeGenerator
         /// <param name="size">The size of the QR code matrix.</param>
         /// <param name="version">The version number of the QR code, which determines the placement of version information.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten.</param>
-        public static void ReserveVersionAreas(int size, int version, BlockedModules blockedModules)
+        public static void ReserveVersionAreas(int size, BlockedModules blockedModules)
         {
             // if (version < 0) // Micro QR codes
             // {
@@ -331,7 +338,8 @@ public partial class QRCodeGenerator
             // }
 
             // Place the dark module, which is always required to be black.
-            qrCode.ModuleMatrix[(4 * version) + 9 + 4][8 + 4] = true;
+            //qrCode.ModuleMatrix[(4 * version) + 9 + 4][8 + 4] = true;
+            qrCode.ModuleMatrix[(4 * version) + 9][8] = true;
 
             // Block the dark module area to prevent overwriting during further QR code generation steps.
             blockedModules.Add(new Rectangle(8, (4 * version) + 9, 1, 1));
@@ -344,10 +352,10 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten. This is updated with the areas occupied by the finder patterns.</param>
         public static void PlaceFinderPatterns(QRCodeData qrCode, BlockedModules blockedModules)
         {
-            var size = qrCode.ModuleMatrix.Count - 8;
+            var size = qrCode.ModuleMatrix.Count; // NO BORDER - 8;
 
             // Loop to place three finder patterns in the top-left, top-right, and bottom-left corners of the QR code.
-            var count = qrCode.Version < 0 ? 1 : 3; // Micro QR codes have only one finder pattern.
+            var count = 3;
             for (var i = 0; i < count; i++)
             {
                 // Calculate the x and y starting positions for each finder pattern based on the index.
@@ -363,7 +371,8 @@ public partial class QRCodeGenerator
                         // The center 3x3 area is filled, bordered by a line of white modules, enclosed by a 7x7 black border.
                         if (!(((x == 1 || x == 5) && y > 0 && y < 6) || (x > 0 && x < 6 && (y == 1 || y == 5))))
                         {
-                            qrCode.ModuleMatrix[y + locationY + 4][x + locationX + 4] = true;
+                            //qrCode.ModuleMatrix[y + locationY + 4][x + locationX + 4] = true;
+                            qrCode.ModuleMatrix[y + locationY][x + locationX] = true;
                         }
                     }
                 }
@@ -403,7 +412,8 @@ public partial class QRCodeGenerator
                         // Create the pattern: a 3x3 block surrounded by a border, with the very center module set.
                         if (y == 0 || y == 4 || x == 0 || x == 4 || (x == 2 && y == 2))
                         {
-                            qrCode.ModuleMatrix[loc.Y + y + 4][loc.X + x + 4] = true;
+                            //qrCode.ModuleMatrix[loc.Y + y + 4][loc.X + x + 4] = true;
+                            qrCode.ModuleMatrix[loc.Y + y][loc.X + x] = true;
                         }
                     }
                 }
@@ -421,7 +431,7 @@ public partial class QRCodeGenerator
         public static void PlaceTimingPatterns(QRCodeData qrCode, BlockedModules blockedModules)
         {
             // Get the size of the QR code matrix excluding padding.
-            var size = qrCode.ModuleMatrix.Count - 8;
+            var size = qrCode.ModuleMatrix.Count;// - 8;
 
             // if (qrCode.Version > 0)
             // {
@@ -430,8 +440,10 @@ public partial class QRCodeGenerator
             {
                 if (i % 2 == 0) // Place a dark module every other module to create the alternating pattern.
                 {
-                    qrCode.ModuleMatrix[6 + 4][i + 4] = true; // Horizontal timing pattern
-                    qrCode.ModuleMatrix[i + 4][6 + 4] = true; // Vertical timing pattern
+                    // qrCode.ModuleMatrix[6 + 4][i + 4] = true; // Horizontal timing pattern                    
+                    // qrCode.ModuleMatrix[i + 4][6 + 4] = true; // Vertical timing pattern
+                    qrCode.ModuleMatrix[6][i] = true; // Horizontal timing pattern
+                    qrCode.ModuleMatrix[i][6] = true; // Vertical timing pattern
                 }
             }
 
