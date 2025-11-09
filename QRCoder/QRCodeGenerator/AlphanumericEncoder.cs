@@ -122,6 +122,7 @@ public partial class QRCodeGenerator
         /// Checks if a character is present in the alphanumeric encoding table.
         /// </summary>
         /// <returns></returns>
+        // NOTE: not currently used, but can be useful for validation
         public static bool CanEncode(char c) => c <= 90 && Map[c] != 255;
 
         /// <summary>
@@ -138,12 +139,12 @@ public partial class QRCodeGenerator
         /// </summary>
         /// <param name="plainText">The alphanumeric text to be encoded, which should only contain characters valid in QR alphanumeric mode.</param>
         /// <returns>A BitArray representing the binary data of the encoded alphanumeric text.</returns>
-        public static BitArray GetBitArray(string plainText)
-        {
-            var codeText = new BitArray(GetBitLength(plainText.Length));
-            _ = WriteToBitArray(plainText, 0, plainText.Length, codeText, 0);
-            return codeText;
-        }
+        // public static BitArray GetBitArray(string plainText)
+        // {
+        //     var codeText = new BitArray(GetBitLength(plainText.Length));
+        //     _ = WriteToBitArray(plainText, 0, plainText.Length, codeText, 0);
+        //     return codeText;
+        // }
 
         /// <summary>
         /// Writes a portion of alphanumeric plain text directly into an existing BitArray at the specified index.
