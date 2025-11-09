@@ -128,13 +128,13 @@ public partial class QRCodeGenerator
             var size = qrCode.ModuleMatrix.Count - 8;
 
             // Temporary QRCodeData object to test different mask patterns without altering the original.
-            var qrTemp = new QRCodeData(version, false);
+            var qrTemp = new QRCodeData(2, false);
             BitArray? versionString = null;
-            if (version >= 7)
-            {
-                versionString = new BitArray(18);
-                GetVersionString(versionString, version);
-            }
+            // if (version >= 7)
+            // {
+            //     versionString = new BitArray(18);
+            //     GetVersionString(versionString, version);
+            // }
 
             var formatStr = new BitArray(15);
             for (var maskPattern = 0; maskPattern < 8; maskPattern++)
@@ -156,7 +156,7 @@ public partial class QRCodeGenerator
                 }
 
                 // Place format information using the current mask pattern.
-                GetFormatString(formatStr, version, eccLevel, maskPattern);
+                GetFormatString(formatStr, 2, ECCLevel.M, maskPattern);
                 PlaceFormat(qrTemp, formatStr, false);
 
                 // Place version information if applicable.
@@ -308,11 +308,11 @@ public partial class QRCodeGenerator
             blockedModules.Add(new Rectangle(8, size - 7, 1, 7)); // Near the bottom timing pattern
 
             // If the version is 7 or higher, additional blocks for version information are added.
-            if (version >= 7)
-            {
-                blockedModules.Add(new Rectangle(size - 11, 0, 3, 6)); // Top right version information block
-                blockedModules.Add(new Rectangle(0, size - 11, 6, 3)); // Bottom left version information block
-            }
+            // if (version >= 7)
+            // {
+            //     blockedModules.Add(new Rectangle(size - 11, 0, 3, 6)); // Top right version information block
+            //     blockedModules.Add(new Rectangle(0, size - 11, 6, 3)); // Bottom left version information block
+            // }
         }
 
         /// <summary>
@@ -324,10 +324,10 @@ public partial class QRCodeGenerator
         public static void PlaceDarkModule(QRCodeData qrCode, int version, BlockedModules blockedModules)
         {
             // Micro QR codes do not have a dark module
-            if (version < 0)
-            {
-                return;
-            }
+            // if (version < 0)
+            // {
+            //     return;
+            // }
 
             // Place the dark module, which is always required to be black.
             qrCode.ModuleMatrix[(4 * version) + 9 + 4][8 + 4] = true;

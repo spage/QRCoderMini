@@ -9,11 +9,11 @@ public class QRCodeGeneratorTests
     {
         // Arrange
         var plainText = "HTTPS://TRKID.COM/Z/PPPPSSSSSSSSNNNNXX";
-        QRCodeGenerator.ECCLevel eccLevel = QRCodeGenerator.ECCLevel.M;
-        var requestedVersion = 2;
+        //QRCodeGenerator.ECCLevel eccLevel = QRCodeGenerator.ECCLevel.M;
+        //var requestedVersion = 2;
 
         // Act
-        QRCodeData qrCodeData = QRCodeGenerator.GenerateQrCode(plainText, eccLevel, requestedVersion: requestedVersion);
+        QRCodeData qrCodeData = QRCodeGenerator.GenerateQrCode(plainText); //, eccLevel, requestedVersion: requestedVersion);
 
         // Assert
         Assert.NotNull(qrCodeData);
@@ -21,7 +21,7 @@ public class QRCodeGeneratorTests
 
         var dataBytes = qrCodeData.GetRawData(QRCodeData.Compression.Uncompressed);
         var hexString = Convert.ToHexString(dataBytes);
-        int expectedLength = 284; // Expected length of the byte array for this specific QR code
+        var expectedLength = 284; // Expected length of the byte array for this specific QR code
         Assert.Equal(expectedLength, hexString.Length);
         Console.WriteLine(hexString);
     }

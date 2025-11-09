@@ -28,10 +28,10 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="eciMode">Which ECI mode shall be used?.</param>
     /// <param name="requestedVersion">Set fixed QR code target version.</param>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-#pragma warning disable CA1822 // Mark members as static
-    public QRCodeData CreateQrCode(string plainText, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1)
-#pragma warning restore CA1822 // Mark members as static
-        => GenerateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
+    // #pragma warning disable CA1822 // Mark members as static
+    //     public QRCodeData CreateQrCode(string plainText)
+    // #pragma warning restore CA1822 // Mark members as static
+    //         => GenerateQrCode(plainText);
 
     /// <summary>
     /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
@@ -39,10 +39,10 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="binaryData">A byte array which shall be encoded/stored in the QR code.</param>
     /// <param name="eccLevel">The level of error correction data.</param>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-#pragma warning disable CA1822 // Mark members as static
-    public QRCodeData CreateQrCode(byte[] binaryData, ECCLevel eccLevel)
-#pragma warning restore CA1822 // Mark members as static
-        => GenerateQrCode(binaryData, eccLevel);
+    // #pragma warning disable CA1822 // Mark members as static
+    //     public QRCodeData CreateQrCode(byte[] binaryData, ECCLevel eccLevel)
+    // #pragma warning restore CA1822 // Mark members as static
+    //         => GenerateQrCode(binaryData);
 
     /// <summary>
     /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
@@ -54,7 +54,7 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="eciMode">Which ECI mode shall be used?.</param>
     /// <param name="requestedVersion">Set fixed QR code target version.</param>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    public static QRCodeData GenerateQrCode(string plainText, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1)
+    public static QRCodeData GenerateQrCode(string plainText)
     {
         //eccLevel = ECCLevel.M;  // only valid level ValidateECCLevel(eccLevel);
 
@@ -66,7 +66,7 @@ public partial class QRCodeGenerator : IDisposable
 
         // Build the complete bit array for the determined version
         var completeBitArray = segment.ToBitArray();
-        return GenerateQrCode(completeBitArray, ECCLevel.M, 2);
+        return GenerateQrCode(completeBitArray);
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="eccLevel">The level of error correction data.</param>
     /// <exception cref="Exceptions.DataTooLongException">Thrown when the payload is too big to be encoded in a QR code.</exception>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    public static QRCodeData GenerateQrCode(byte[] binaryData, ECCLevel eccLevel)
+    public static QRCodeData GenerateQrCode(byte[] binaryData)
     {
         //eccLevel = ECCLevel.M;  // only valid level ValidateECCLevel(eccLevel);
         //var version = 2;  //CapacityTables.CalculateMinimumVersion(binaryData.Length, EncodingMode.Byte, eccLevel);
@@ -247,7 +247,7 @@ public partial class QRCodeGenerator : IDisposable
         var index = DecToBin((int)EncodingMode.Byte, 4, bitArray, 0);
         _ = DecToBin(binaryData.Length, countIndicatorLen, bitArray, index);
 
-        return GenerateQrCode(bitArray, ECCLevel.M, 2);
+        return GenerateQrCode(bitArray);
     }
 
     /// <summary>
@@ -273,7 +273,7 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="eccLevel">The desired error correction level for the QR code. This impacts how much data can be recovered if damaged.</param>
     /// <param name="version">The version of the QR code, determining the size and complexity of the QR code data matrix.</param>
     /// <returns>A QRCodeData structure containing the full QR code matrix, which can be used for rendering or analysis.</returns>
-    private static QRCodeData GenerateQrCode(BitArray bitArray, ECCLevel eccLevel, int version)
+    private static QRCodeData GenerateQrCode(BitArray bitArray)
     {
         //ECCInfo eccInfo = CapacityTables.GetEccInfo(version, eccLevel);
         var eccInfo = new ECCInfo(
@@ -316,14 +316,14 @@ public partial class QRCodeGenerator : IDisposable
                 bitArray.Length = dataLength;
 
                 // compute padding length
-                var padLength = version switch
-                {
-                    > 0 => 4,
-                    -1 => 3,
-                    -2 => 5,
-                    -3 => 7,
-                    _ => 9,
-                };
+                var padLength = 4;
+                // {
+                //     > 0 => 4,
+                //     -1 => 3,
+                //     -2 => 5,
+                //     -3 => 7,
+                //     _ => 9,
+                // };
 
                 // pad with zeros (or less if not enough room)
                 index += padLength;
@@ -335,14 +335,14 @@ public partial class QRCodeGenerator : IDisposable
                 }
 
                 // for m1 and m3 sizes don't fill last 4 bits with repeating pattern
-                if (version == -1)
-                {
-                    dataLength -= 4;
-                }
-                if (version == -3)
-                {
-                    dataLength -= 4;
-                }
+                // if (version == -1)
+                // {
+                //     dataLength -= 4;
+                // }
+                // if (version == -3)
+                // {
+                //     dataLength -= 4;
+                // }
 
                 // pad with repeating pattern
                 var repeatingPatternIndex = 0;
@@ -391,11 +391,11 @@ public partial class QRCodeGenerator : IDisposable
         {
             var length = 0;
             var codewords = Math.Max(eccInfo.CodewordsInGroup1, eccInfo.CodewordsInGroup2);
-            if (version is (-1) or (-3))
-            {
-                codewords--;
-                length += 4;
-            }
+            // if (version is (-1) or (-3))
+            // {
+            //     codewords--;
+            //     length += 4;
+            // }
 
             for (var i = 0; i < codewords; i++)
             {
@@ -484,20 +484,20 @@ public partial class QRCodeGenerator : IDisposable
         // Place the modules on the QR code matrix
         QRCodeData PlaceModules()
         {
-            var qr = new QRCodeData(version, true);
+            var qr = new QRCodeData(2, true);
             var size = qr.ModuleMatrix.Count - 8;
             var tempBitArray = new BitArray(18); // version string requires 18 bits
             using (var blockedModules = new ModulePlacer.BlockedModules(size))
             {
                 ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
-                ModulePlacer.ReserveSeperatorAreas(version, size, blockedModules);
+                ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules);
                 ModulePlacer.PlaceAlignmentPatterns(qr, AlignmentPatterns.alignmentPattern, blockedModules);
                 ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
-                ModulePlacer.PlaceDarkModule(qr, version, blockedModules);
-                ModulePlacer.ReserveVersionAreas(size, version, blockedModules);
+                ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
+                ModulePlacer.ReserveVersionAreas(size, 2, blockedModules);
                 ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
-                var maskVersion = ModulePlacer.MaskCode(qr, version, blockedModules, eccLevel);
-                GetFormatString(tempBitArray, version, eccLevel, maskVersion);
+                var maskVersion = ModulePlacer.MaskCode(qr, 2, blockedModules, ECCLevel.M);
+                GetFormatString(tempBitArray, 2, ECCLevel.M, maskVersion);
                 ModulePlacer.PlaceFormat(qr, tempBitArray, true);
             }
 
