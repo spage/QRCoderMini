@@ -11,9 +11,6 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-  </ItemGroup>
 
   <!-- Rely on the SDK-provided .NET analyzers. Removing the explicit NuGet package so the SDK's analyzers are used. -->
 

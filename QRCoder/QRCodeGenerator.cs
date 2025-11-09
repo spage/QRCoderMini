@@ -59,7 +59,7 @@ public partial class QRCodeGenerator : IDisposable
         eccLevel = ValidateECCLevel(eccLevel);
 
         // Create data segment from plain text
-        DataSegment segment = CreateDataSegment(plainText, forceUtf8, utf8BOM, eciMode);
+        DataSegment segment = new AlphanumericDataSegment(plainText);
 
         // Determine the appropriate version based on segment bit length
         var version = 2;  //DetermineVersion(segment, eccLevel, requestedVersion);
@@ -72,21 +72,23 @@ public partial class QRCodeGenerator : IDisposable
     /// <summary>
     /// Creates a data segment from plain text, encoding it appropriately.
     /// </summary>
-    private static DataSegment CreateDataSegment(string plainText, bool forceUtf8, bool utf8BOM, EciMode eciMode)
-    {
-        EncodingMode encoding = EncodingMode.Alphanumeric;
+    // private static DataSegment CreateDataSegment(string plainText, bool forceUtf8, bool utf8BOM, EciMode eciMode)
+    // {
+    //     return new AlphanumericDataSegment(plainText);
 
-        // Use specialized segment classes based on encoding mode
-        return encoding switch
-        {
-            EncodingMode.Alphanumeric => new AlphanumericDataSegment(plainText),
-            EncodingMode.Byte => new ByteDataSegment(plainText, forceUtf8, utf8BOM, eciMode),
-            EncodingMode.Numeric => throw new NotImplementedException(),
-            EncodingMode.Kanji => throw new NotImplementedException(),
-            EncodingMode.ECI => throw new NotImplementedException(),
-            _ => throw new InvalidOperationException($"Unsupported encoding mode: {encoding}"),
-        };
-    }
+    //     // EncodingMode encoding = EncodingMode.Alphanumeric;
+
+    //     // // Use specialized segment classes based on encoding mode
+    //     // return encoding switch
+    //     // {
+    //     //     EncodingMode.Alphanumeric => new AlphanumericDataSegment(plainText),
+    //     //     EncodingMode.Byte => throw new NotImplementedException(),
+    //     //     EncodingMode.Numeric => throw new NotImplementedException(),
+    //     //     EncodingMode.Kanji => throw new NotImplementedException(),
+    //     //     EncodingMode.ECI => throw new NotImplementedException(),
+    //     //     _ => throw new InvalidOperationException($"Unsupported encoding mode: {encoding}"),
+    //     // };
+    // }
 
     /// <summary>
     /// Determines the appropriate QR code version based on the data segment and error correction level.
