@@ -496,7 +496,7 @@ public partial class QRCodeGenerator : IDisposable
                 ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
                 ModulePlacer.ReserveVersionAreas(size, 2, blockedModules);
                 ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
-                var maskVersion = ModulePlacer.MaskCode(qr, 2, blockedModules, ECCLevel.M);
+                var maskVersion = ModulePlacer.MaskCode(qr, blockedModules);
                 GetFormatString(tempBitArray, 2, ECCLevel.M, maskVersion);
                 ModulePlacer.PlaceFormat(qr, tempBitArray, true);
             }

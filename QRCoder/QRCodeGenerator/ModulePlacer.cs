@@ -38,7 +38,7 @@ public partial class QRCodeGenerator
         /// <param name="offset">Specifies whether an offset should be applied.</param>
         public static void PlaceFormat(QRCodeData qrCode, BitArray formatStr, bool offset)
         {
-            var isMicro = qrCode.Version < 0; // Negative versions indicate Micro QR codes.
+            //var isMicro = qrCode.Version < 0; // Negative versions indicate Micro QR codes.
             var offsetValue = offset ? 4 : 0;
             var size = qrCode.ModuleMatrix.Count - offsetValue - offsetValue;
 
@@ -88,26 +88,26 @@ public partial class QRCodeGenerator
             {
                 int x1, y1, x2, y2;
 
-                if (isMicro)
-                {
-                    // Micro QR format positions
-                    x1 = i < 8 ? 8 : 14 - i + 1;
-                    y1 = i < 8 ? i + 1 : 8;
+                // if (isMicro)
+                // {
+                //     // Micro QR format positions
+                //     x1 = i < 8 ? 8 : 14 - i + 1;
+                //     y1 = i < 8 ? i + 1 : 8;
 
-                    // Micro QR only uses one set of format positions, no duplication.
-                    qrCode.ModuleMatrix[y1 + offsetValue][x1 + offsetValue] = formatStr[14 - i];
-                }
-                else
-                {
-                    // Standard QR format positions
-                    x1 = i < 8 ? 8 : i == 8 ? 7 : 14 - i;
-                    y1 = i < 6 ? i : i < 7 ? i + 1 : 8;
-                    x2 = i < 8 ? size - 1 - i : 8;
-                    y2 = i < 8 ? 8 : size - (15 - i);
+                //     // Micro QR only uses one set of format positions, no duplication.
+                //     qrCode.ModuleMatrix[y1 + offsetValue][x1 + offsetValue] = formatStr[14 - i];
+                // }
+                // else
+                // {
+                // Standard QR format positions
+                x1 = i < 8 ? 8 : i == 8 ? 7 : 14 - i;
+                y1 = i < 6 ? i : i < 7 ? i + 1 : 8;
+                x2 = i < 8 ? size - 1 - i : 8;
+                y2 = i < 8 ? 8 : size - (15 - i);
 
-                    qrCode.ModuleMatrix[y1 + offsetValue][x1 + offsetValue] = formatStr[14 - i];
-                    qrCode.ModuleMatrix[y2 + offsetValue][x2 + offsetValue] = formatStr[14 - i];
-                }
+                qrCode.ModuleMatrix[y1 + offsetValue][x1 + offsetValue] = formatStr[14 - i];
+                qrCode.ModuleMatrix[y2 + offsetValue][x2 + offsetValue] = formatStr[14 - i];
+                //}
             }
         }
 
@@ -120,7 +120,7 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">List of rectangles representing areas that must not be overwritten.</param>
         /// <param name="eccLevel">The error correction level of the QR code, which affects format string values.</param>
         /// <returns>The index of the selected mask pattern.</returns>
-        public static int MaskCode(QRCodeData qrCode, int version, BlockedModules blockedModules, ECCLevel eccLevel)
+        public static int MaskCode(QRCodeData qrCode, BlockedModules blockedModules)
         {
             var selectedPattern = -1;        // no pattern selected yet
             var patternScore = int.MaxValue; // lower score is better
@@ -139,10 +139,10 @@ public partial class QRCodeGenerator
             var formatStr = new BitArray(15);
             for (var maskPattern = 0; maskPattern < 8; maskPattern++)
             {
-                if (version < 0 && (maskPattern == 0 || maskPattern == 2 || maskPattern == 3 || maskPattern == 5))
-                {
-                    continue; // Micro QR codes only support certain mask patterns.
-                }
+                // if (version < 0 && (maskPattern == 0 || maskPattern == 2 || maskPattern == 3 || maskPattern == 5))
+                // {
+                //     continue; // Micro QR codes only support certain mask patterns.
+                // }
 
                 Func<int, int, bool> patternFunc = MaskPattern.Patterns[maskPattern];
 
@@ -183,7 +183,8 @@ public partial class QRCodeGenerator
                     }
                 }
 
-                var score = version < 0 ? MaskPattern.ScoreMicro(qrTemp) : MaskPattern.Score(qrTemp);
+                //var score = version < 0 ? MaskPattern.ScoreMicro(qrTemp) : MaskPattern.Score(qrTemp);
+                var score = MaskPattern.Score(qrTemp);
 
                 // Select the pattern with the lowest score, indicating better QR code readability.
                 if (patternScore > score)
@@ -292,12 +293,12 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten.</param>
         public static void ReserveVersionAreas(int size, int version, BlockedModules blockedModules)
         {
-            if (version < 0) // Micro QR codes
-            {
-                blockedModules.Add(new Rectangle(0, 8, 9, 1));
-                blockedModules.Add(new Rectangle(8, 0, 1, 8));
-                return;
-            }
+            // if (version < 0) // Micro QR codes
+            // {
+            //     blockedModules.Add(new Rectangle(0, 8, 9, 1));
+            //     blockedModules.Add(new Rectangle(8, 0, 1, 8));
+            //     return;
+            // }
 
             // Reserve areas near the timing patterns for version and format information.
             blockedModules.Add(new Rectangle(8, 0, 1, 6));        // Near the top timing pattern
@@ -422,38 +423,38 @@ public partial class QRCodeGenerator
             // Get the size of the QR code matrix excluding padding.
             var size = qrCode.ModuleMatrix.Count - 8;
 
-            if (qrCode.Version > 0)
+            // if (qrCode.Version > 0)
+            // {
+            // Place timing patterns starting from the 8th module to the size - 8 to avoid overlapping with finder patterns.
+            for (var i = 8; i < size - 8; i++)
             {
-                // Place timing patterns starting from the 8th module to the size - 8 to avoid overlapping with finder patterns.
-                for (var i = 8; i < size - 8; i++)
+                if (i % 2 == 0) // Place a dark module every other module to create the alternating pattern.
                 {
-                    if (i % 2 == 0) // Place a dark module every other module to create the alternating pattern.
-                    {
-                        qrCode.ModuleMatrix[6 + 4][i + 4] = true; // Horizontal timing pattern
-                        qrCode.ModuleMatrix[i + 4][6 + 4] = true; // Vertical timing pattern
-                    }
+                    qrCode.ModuleMatrix[6 + 4][i + 4] = true; // Horizontal timing pattern
+                    qrCode.ModuleMatrix[i + 4][6 + 4] = true; // Vertical timing pattern
                 }
-
-                // Add the areas occupied by the timing patterns to the list of blocked modules.
-                blockedModules.Add(new Rectangle(6, 8, 1, size - 16)); // Horizontal timing pattern area
-                blockedModules.Add(new Rectangle(8, 6, size - 16, 1)); // Vertical timing pattern area
             }
-            else // Micro QR codes
-            {
-                // Place timing patterns starting from the 8th module to avoid overlapping with finder patterns.
-                for (var i = 8; i < size; i++)
-                {
-                    if (i % 2 == 0) // Place a dark module every other module to create the alternating pattern.
-                    {
-                        qrCode.ModuleMatrix[4][i + 4] = true; // Horizontal timing pattern
-                        qrCode.ModuleMatrix[i + 4][4] = true; // Vertical timing pattern
-                    }
-                }
 
-                // Add the areas occupied by the timing patterns to the list of blocked modules.
-                blockedModules.Add(new Rectangle(0, 8, 1, size - 8)); // Horizontal timing pattern area
-                blockedModules.Add(new Rectangle(8, 0, size - 8, 1)); // Vertical timing pattern area
-            }
+            // Add the areas occupied by the timing patterns to the list of blocked modules.
+            blockedModules.Add(new Rectangle(6, 8, 1, size - 16)); // Horizontal timing pattern area
+            blockedModules.Add(new Rectangle(8, 6, size - 16, 1)); // Vertical timing pattern area
+            // }
+            // else // Micro QR codes
+            // {
+            //     // Place timing patterns starting from the 8th module to avoid overlapping with finder patterns.
+            //     for (var i = 8; i < size; i++)
+            //     {
+            //         if (i % 2 == 0) // Place a dark module every other module to create the alternating pattern.
+            //         {
+            //             qrCode.ModuleMatrix[4][i + 4] = true; // Horizontal timing pattern
+            //             qrCode.ModuleMatrix[i + 4][4] = true; // Vertical timing pattern
+            //         }
+            //     }
+
+            //     // Add the areas occupied by the timing patterns to the list of blocked modules.
+            //     blockedModules.Add(new Rectangle(0, 8, 1, size - 8)); // Horizontal timing pattern area
+            //     blockedModules.Add(new Rectangle(8, 0, size - 8, 1)); // Vertical timing pattern area
+            // }
         }
     }
 }
