@@ -71,7 +71,7 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Gets the total number of data codewords for this version and error correction level.
         /// </summary>
-        public int TotalDataBits { get;}
+        public int TotalDataBits { get; }
 
         /// <summary>
         /// Gets the number of error correction codewords per block.
