@@ -19,7 +19,7 @@ public class QRCodeGeneratorTests
         Assert.NotNull(qrCodeData);
         Assert.Equal(2, qrCodeData.Version);
 
-        var dataBytes = qrCodeData.GetRawData(QRCodeData.Compression.Uncompressed);
+        var dataBytes = qrCodeData.GetRawData();
         var hexString = Convert.ToHexString(dataBytes);
         var expectedLength = 284; // Expected length of the byte array for this specific QR code
         Assert.Equal(expectedLength, hexString.Length);
