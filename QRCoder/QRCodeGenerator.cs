@@ -70,14 +70,6 @@ public partial class QRCodeGenerator : IDisposable
     /// <returns>A QRCodeData structure containing the full QR code matrix, which can be used for rendering or analysis.</returns>
     private static QRCodeData GenerateQrCode(BitArray bitArray)
     {
-        //ECCInfo eccInfo = CapacityTables.GetEccInfo(version, eccLevel);
-        var eccInfo = new ECCInfo(
-            version: 2,
-            errorCorrectionLevel: ECCLevel.M,
-            totalDataCodewords: 28,
-            totalDataBits: 28 * 8,
-            eccPerBlock: 16);
-
         // Fill up data code word
         PadData();
 
@@ -100,7 +92,7 @@ public partial class QRCodeGenerator : IDisposable
         // fills the bit array with a repeating pattern to reach the required length
         void PadData()
         {
-            var dataLength = eccInfo.TotalDataBits;
+            var dataLength = 28 * 8;
             var lengthDiff = dataLength - bitArray.Length;
             if (lengthDiff > 0)
             {
@@ -140,13 +132,13 @@ public partial class QRCodeGenerator : IDisposable
             List<CodewordBlock> codewordBlocks;
 
             // Generate the generator polynomial using the number of ECC words.
-            using (Polynom generatorPolynom = CalculateGeneratorPolynom(eccInfo.ECCPerBlock))
+            using (Polynom generatorPolynom = CalculateGeneratorPolynom(16))
             {
                 // Calculate error correction words
-                codewordBlocks = CodewordBlock.GetList(eccInfo.BlocksInGroup1 + eccInfo.BlocksInGroup2);
-                AddCodeWordBlocks(1, eccInfo.BlocksInGroup1, eccInfo.CodewordsInGroup1, 0, bitArray.Length, generatorPolynom);
-                var offset = eccInfo.BlocksInGroup1 * eccInfo.CodewordsInGroup1 * 8;
-                AddCodeWordBlocks(2, eccInfo.BlocksInGroup2, eccInfo.CodewordsInGroup2, offset, bitArray.Length - offset, generatorPolynom);
+                codewordBlocks = CodewordBlock.GetList(1);
+                AddCodeWordBlocks(1, 1, 28, 0, bitArray.Length, generatorPolynom);
+                var offset = 1 * 28 * 8;
+                AddCodeWordBlocks(2, 1, 28, offset, bitArray.Length - offset, generatorPolynom);
                 return codewordBlocks;
             }
 
@@ -157,7 +149,7 @@ public partial class QRCodeGenerator : IDisposable
                 groupLength = groupLength > count ? count : groupLength;
                 for (var i = 0; i < blocksInGroup; i++)
                 {
-                    ArraySegment<byte> eccWordList = CalculateECCWords(bitArray, offset2, groupLength, eccInfo, generatorPolynom);
+                    ArraySegment<byte> eccWordList = CalculateECCWords(bitArray, offset2, groupLength, generatorPolynom);
                     codewordBlocks.Add(new CodewordBlock(offset2, groupLength, eccWordList));
                     offset2 += groupLength;
                 }
@@ -168,7 +160,7 @@ public partial class QRCodeGenerator : IDisposable
         int CalculateInterleavedLength()
         {
             var length = 0;
-            var codewords = Math.Max(eccInfo.CodewordsInGroup1, eccInfo.CodewordsInGroup2);
+            var codewords = 28;
 
             for (var i = 0; i < codewords; i++)
             {
@@ -181,7 +173,7 @@ public partial class QRCodeGenerator : IDisposable
                 }
             }
 
-            for (var i = 0; i < eccInfo.ECCPerBlock; i++)
+            for (var i = 0; i < 16; i++)
             {
                 foreach (CodewordBlock codeBlock in codeWordWithECC)
                 {
@@ -202,7 +194,7 @@ public partial class QRCodeGenerator : IDisposable
             var data = new BitArray(interleavedLength);
             var pos = 0;
 
-            for (var i = 0; i < Math.Max(eccInfo.CodewordsInGroup1, eccInfo.CodewordsInGroup2); i++)
+            for (var i = 0; i < 28; i++)
             {
                 foreach (CodewordBlock codeBlock in codeWordWithECC)
                 {
@@ -218,7 +210,7 @@ public partial class QRCodeGenerator : IDisposable
                 }
             }
 
-            for (var i = 0; i < eccInfo.ECCPerBlock; i++)
+            for (var i = 0; i < 16; i++)
             {
                 foreach (CodewordBlock codeBlock in codeWordWithECC)
                 {
@@ -362,9 +354,9 @@ public partial class QRCodeGenerator : IDisposable
     /// This method applies polynomial division, using the message polynomial and a generator polynomial,
     /// to compute the remainder which forms the ECC codewords.
     /// </summary>
-    private static ArraySegment<byte> CalculateECCWords(BitArray bitArray, int offset, int count, ECCInfo eccInfo, Polynom generatorPolynomBase)
+    private static ArraySegment<byte> CalculateECCWords(BitArray bitArray, int offset, int count, Polynom generatorPolynomBase)
     {
-        var eccWords = eccInfo.ECCPerBlock;
+        var eccWords = 16;
 
         // Calculate the message polynomial from the bit array data.
         Polynom messagePolynom = CalculateMessagePolynom(bitArray, offset, count);
