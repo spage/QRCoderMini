@@ -235,7 +235,7 @@ public partial class QRCodeGenerator : IDisposable
             {
                 ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
                 ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules);
-                ModulePlacer.PlaceAlignmentPatterns(qr, AlignmentPatterns.alignmentPattern, blockedModules);
+                ModulePlacer.PlaceAlignmentPatterns(qr, blockedModules);
                 ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
                 ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
                 ModulePlacer.ReserveVersionAreas(size, blockedModules);

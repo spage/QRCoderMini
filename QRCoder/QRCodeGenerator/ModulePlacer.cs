@@ -302,10 +302,15 @@ public partial class QRCodeGenerator
         /// <param name="qrCode">The QR code data structure where the alignment patterns will be placed.</param>
         /// <param name="alignmentPatternLocations">A list of points representing the centers of where alignment patterns should be placed.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten. Updated with the areas occupied by alignment patterns.</param>
-        public static void PlaceAlignmentPatterns(QRCodeData qrCode, List<Point> alignmentPatternLocations, BlockedModules blockedModules)
+        public static void PlaceAlignmentPatterns(QRCodeData qrCode, BlockedModules blockedModules)
         {
+            List<Point> alignmentPattern =
+            [
+                new Point(4, 4), new Point(4, 16), new Point(16, 4), new Point(16, 16)
+            ];
+
             // Iterate through each specified location for alignment patterns.
-            foreach (Point loc in alignmentPatternLocations)
+            foreach (Point loc in alignmentPattern)
             {
                 // Define a 5x5 rectangle for the alignment pattern based on the center point provided.
                 var alignmentPatternRect = new Rectangle(loc.X, loc.Y, 5, 5);
