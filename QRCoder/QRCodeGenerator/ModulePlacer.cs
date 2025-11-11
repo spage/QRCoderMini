@@ -85,12 +85,15 @@ public partial class QRCodeGenerator
             {
                 Func<int, int, bool> patternFunc = MaskPattern.Patterns[maskPattern];
 
-                // Reset the temporary QR code to the current state of the actual QR code.
+                // Reset the temporary QR code to the current state of the actual QR code
+                // Reuse existing BitArray instances to avoid allocations
                 for (var y = 0; y < size; y++)
                 {
+                    BitArray sourceRow = qrCode.ModuleMatrix[y];
+                    BitArray destRow = qrTemp.ModuleMatrix[y];
                     for (var x = 0; x < size; x++)
                     {
-                        qrTemp.ModuleMatrix[y][x] = qrCode.ModuleMatrix[y][x];  //[y + 4][x + 4];
+                        destRow[x] = sourceRow[x];
                     }
                 }
 
