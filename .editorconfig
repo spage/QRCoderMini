@@ -53,6 +53,10 @@ dotnet_diagnostic.IDE0060.severity = warning   # remove unused parameters
 # Promote some Microsoft analyzer rules to warnings where helpful
 dotnet_diagnostic.CA1510.severity = warning    # prefer ArgumentNullException.ThrowIfNull
 
+# Suppress collection expression suggestions - causes ambiguity with BitArray constructors
+dotnet_diagnostic.IDE0300.severity = none      # collection initialization can be simplified
+dotnet_diagnostic.IDE0301.severity = none      # collection initialization can be simplified
+
 # Suppress CA1707 (no underscores) for test files - underscores are conventional in test method names
 [**/*Tests.cs]
 dotnet_diagnostic.CA1707.severity = none

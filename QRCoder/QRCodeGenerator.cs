@@ -440,32 +440,15 @@ public partial class QRCodeGenerator : IDisposable
                 {
                     if ((uint)codeBlock.CodeWordsLength / 8 > i)
                     {
-                        pos = bitArray.CopyTo(data, (int)((uint)i * 8) + codeBlock.CodeWordsOffset, pos, 8);
-                        // for (var j = 0; j < 8; j++)
-                        // {
-                        //     data[pos + j] = bitArray[(int)((uint)j * 8) + codeBlock.CodeWordsOffset + j];
-                        // }
-                        // pos += 8;
+                        // Inline copy of 8 bits from bitArray to data
+                        for (var j = 0; j < 8; j++)
+                        {
+                            data[pos + j] = bitArray[(int)((uint)i * 8) + codeBlock.CodeWordsOffset + j];
+                        }
+                        pos += 8;
                     }
                 }
             }
-
-            /*
-            public static int CopyTo(this BitArray source, BitArray destination, int sourceOffset, int destinationOffset, int count)
-            {
-                for (var i = 0; i < 8; i++)
-                {
-                    data[pos + i] = source[(int)((uint)i * 8) + codeBlock.CodeWordsOffset + i];
-                }
-
-                return pos + 8;
-            }
-            */
-
-            // if (version is (-1) or (-3))
-            // {
-            //     pos = bitArray.CopyTo(data, (int)((uint)codewords * 8) + codeWordWithECC[0].CodeWordsOffset, pos, 4);
-            // }
 
             for (var i = 0; i < eccInfo.ECCPerBlock; i++)
             {
@@ -508,7 +491,7 @@ public partial class QRCodeGenerator : IDisposable
 
     private static readonly BitArray getFormatGenerator = new(new bool[] { true, false, true, false, false, true, true, false, true, true, true });
     private static readonly BitArray getFormatMask = new(new bool[] { true, false, true, false, true, false, false, false, false, false, true, false, false, true, false });
-    //private static readonly BitArray getFormatMicroMask = new(new bool[] { true, false, false, false, true, false, false, false, true, false, false, false, true, false, true });
+    private static readonly BitArray getFormatMicroMask = new(new bool[] { true, false, false, false, true, false, false, false, true, false, false, false, true, false, true });
 
     /// <summary>
     /// Generates a BitArray containing the format string for a QR code based on the error correction level and mask pattern version.
