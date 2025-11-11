@@ -10,11 +10,6 @@ public partial class QRCodeGenerator
     private sealed class AlphanumericDataSegment(string alphanumericText) : DataSegment(alphanumericText)
     {
         /// <summary>
-        /// Gets the encoding mode (always Alphanumeric).
-        /// </summary>
-        public override EncodingMode EncodingMode => EncodingMode.Alphanumeric;
-
-        /// <summary>
         /// Calculates the total bit length for this segment when encoded for a specific QR code version.
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
@@ -61,7 +56,7 @@ public partial class QRCodeGenerator
         public static int WriteTo(string text, int offset, int length, BitArray bitArray, int bitIndex)
         {
             // write mode indicator
-            bitIndex = DecToBin((int)EncodingMode.Alphanumeric, 4, bitArray, bitIndex);
+            bitIndex = DecToBin(2, 4, bitArray, bitIndex);
 
             // write count indicator
             var countIndicatorLength = 9; //GetCountIndicatorLength(version, EncodingMode.Alphanumeric);

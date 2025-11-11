@@ -51,7 +51,7 @@ public partial class QRCodeGenerator : IDisposable
         BitArray bitArray = ToBitArray(binaryData, prefixZeros: 4 + 9);
 
         // Add mode indicator and count indicator
-        var index = DecToBin((int)EncodingMode.Byte, 4, bitArray, 0);
+        var index = DecToBin(4, 4, bitArray, 0);
         _ = DecToBin(binaryData.Length, 9, bitArray, index);
 
         return GenerateQrCode(bitArray);

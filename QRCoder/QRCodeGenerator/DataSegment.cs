@@ -19,11 +19,6 @@ public partial class QRCodeGenerator
         public string Text { get; } = text;
 
         /// <summary>
-        /// Gets the encoding mode for this segment (Numeric, Alphanumeric, Byte, etc.)
-        /// </summary>
-        public abstract EncodingMode EncodingMode { get; }
-
-        /// <summary>
         /// Writes this data segment to an existing BitArray at the specified index for a specific QR code version.
         /// Chains to the next segment if present.
         /// </summary>
