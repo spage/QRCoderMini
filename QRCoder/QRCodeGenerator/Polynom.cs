@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -26,11 +24,6 @@ public partial class QRCodeGenerator
         /// </summary>
         public void RemoveAt(int index)
         {
-            if ((uint)index >= (uint)Count)
-            {
-                ThrowIndexArgumentOutOfRangeException();
-            }
-
             if (index < Count - 1)
             {
                 Array.Copy(polyItems, index + 1, polyItems, index, Count - index - 1);
@@ -44,29 +37,10 @@ public partial class QRCodeGenerator
         /// </summary>
         public readonly PolynomItem this[int index]
         {
-            get
-            {
-                if ((uint)index >= Count)
-                {
-                    ThrowIndexArgumentOutOfRangeException();
-                }
+            get => polyItems[index];
 
-                return polyItems[index];
-            }
-
-            set
-            {
-                if ((uint)index >= Count)
-                {
-                    ThrowIndexArgumentOutOfRangeException();
-                }
-
-                polyItems[index] = value;
-            }
+            set => polyItems[index] = value;
         }
-
-        [StackTraceHidden]
-        private static void ThrowIndexArgumentOutOfRangeException() => throw new ArgumentOutOfRangeException("index");
 
         /// <summary>
         /// Gets the number of polynomial terms in the polynomial.
@@ -98,9 +72,7 @@ public partial class QRCodeGenerator
         /// </param>
         public readonly void Sort(Func<PolynomItem, PolynomItem, int> comparer)
         {
-            ArgumentNullException.ThrowIfNull(comparer);
-
-            PolynomItem[] items = polyItems ?? throw new ObjectDisposedException(nameof(Polynom));
+            PolynomItem[] items = polyItems;
 
             if (Count <= 1)
             {

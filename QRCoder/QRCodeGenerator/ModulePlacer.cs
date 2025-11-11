@@ -175,7 +175,7 @@ public partial class QRCodeGenerator
             for (var x = size - 1; x >= 0; x -= 2)
             {
                 // Skip the timing pattern column at position 6 (for normal QR codes only, not Micro QR codes).
-                if (qrCode.Version > 0 && x == 6)
+                if (x == 6)
                 {
                     x = 5;
                 }
@@ -210,22 +210,20 @@ public partial class QRCodeGenerator
         /// <param name="version">The version of the QR code, which determines the number of finder patterns.</param>
         /// <param name="size">The size of the QR code matrix.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten.</param>
-        public static void ReserveSeperatorAreas(int version, int size, BlockedModules blockedModules)
+        public static void ReserveSeperatorAreas(int size, BlockedModules blockedModules)
         {
             // Block areas around the top-left finder pattern
             blockedModules.Add(new Rectangle(7, 0, 1, 8));        // Vertical block near the top left finder pattern
             blockedModules.Add(new Rectangle(0, 7, 7, 1));        // Horizontal block near the top left finder pattern
 
-            if (version > 0) // Non-micro QR codes have 3 finder patterns
-            {
-                // Block areas around the bottom-left finder pattern
-                blockedModules.Add(new Rectangle(0, size - 8, 8, 1)); // Horizontal block near the bottom left finder pattern
-                blockedModules.Add(new Rectangle(7, size - 7, 1, 7)); // Vertical block near the bottom left finder pattern
+            // Block areas around the bottom-left finder pattern
+            blockedModules.Add(new Rectangle(0, size - 8, 8, 1)); // Horizontal block near the bottom left finder pattern
+            blockedModules.Add(new Rectangle(7, size - 7, 1, 7)); // Vertical block near the bottom left finder pattern
 
-                // Block areas around the top-right finder pattern
-                blockedModules.Add(new Rectangle(size - 8, 0, 1, 8)); // Vertical block near the top right finder pattern
-                blockedModules.Add(new Rectangle(size - 7, 7, 7, 1)); // Horizontal block near the top right finder pattern
-            }
+            // Block areas around the top-right finder pattern
+            blockedModules.Add(new Rectangle(size - 8, 0, 1, 8)); // Vertical block near the top right finder pattern
+            blockedModules.Add(new Rectangle(size - 7, 7, 7, 1)); // Horizontal block near the top right finder pattern
+
         }
 
         /// <summary>

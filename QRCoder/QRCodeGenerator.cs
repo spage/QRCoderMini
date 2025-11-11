@@ -38,25 +38,6 @@ public partial class QRCodeGenerator : IDisposable
         return GenerateQrCode(completeBitArray);
     }
 
-    /// <summary>
-    /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
-    /// </summary>
-    /// <param name="binaryData">A byte array which shall be encoded/stored in the QR code.</param>
-    /// <param name="eccLevel">The level of error correction data.</param>
-    /// <exception cref="Exceptions.DataTooLongException">Thrown when the payload is too big to be encoded in a QR code.</exception>
-    /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    public static QRCodeData GenerateQrCode(byte[] binaryData)
-    {
-        // Convert byte array to bit array, with prefix padding for mode indicator and count indicator
-        BitArray bitArray = ToBitArray(binaryData, prefixZeros: 4 + 9);
-
-        // Add mode indicator and count indicator
-        var index = DecToBin(4, 4, bitArray, 0);
-        _ = DecToBin(binaryData.Length, 9, bitArray, index);
-
-        return GenerateQrCode(bitArray);
-    }
-
     private static readonly BitArray repeatingPattern = new(
         new bool[] { true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, true });
 
@@ -234,7 +215,7 @@ public partial class QRCodeGenerator : IDisposable
             using (var blockedModules = new ModulePlacer.BlockedModules(size))
             {
                 ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
-                ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules);
+                ModulePlacer.ReserveSeperatorAreas(size, blockedModules);
                 ModulePlacer.PlaceAlignmentPatterns(qr, blockedModules);
                 ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
                 ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
@@ -311,43 +292,6 @@ public partial class QRCodeGenerator : IDisposable
     private static void ShiftTowardsBit0(BitArray fStrEcc, int num) => _ = fStrEcc.RightShift(num); // Shift towards bit 0
 
     private static void ShiftAwayFromBit0(BitArray fStrEcc, int num) => _ = fStrEcc.LeftShift(num); // Shift away from bit 0
-
-    private static readonly BitArray getVersionGenerator = new(new bool[] { true, true, true, true, true, false, false, true, false, false, true, false, true });
-
-    /// <summary>
-    /// Encodes the version information of a QR code into a BitArray using error correction coding similar to format information encoding.
-    /// This method is used for QR codes version 7 and above.
-    /// </summary>
-    /// <param name="vStr">A <see cref="BitArray"/> to write the version string to.</param>
-    /// <param name="version">The version number of the QR code (7-40).</param>
-    private static void GetVersionString(BitArray vStr, int version)
-    {
-        vStr.Length = 18;
-        vStr.SetAll(false);
-        _ = DecToBin(version, 6, vStr, 0); // Convert the version number to a 6-bit binary representation.
-
-        var count = vStr.Length;
-        var index = 0;
-        TrimLeadingZeros(vStr, ref index, ref count); // Trim leading zeros to normalize the version bit sequence.
-
-        // Perform error correction encoding using a polynomial generator (specified by _getVersionGenerator).
-        while (count > 12) // The target length of the version information error correction information is 12 bits.
-        {
-            for (var i = 0; i < getVersionGenerator.Length; i++)
-            {
-                vStr[index + i] ^= getVersionGenerator[i]; // XOR the current bits with the generator sequence.
-            }
-
-            TrimLeadingZeros(vStr, ref index, ref count); // Trim leading zeros after each XOR operation to maintain the proper sequence.
-        }
-
-        ShiftTowardsBit0(vStr, index); // Align the bit array so the data starts at index 0.
-
-        // Prefix the error correction encoding with 6 bits containing the version number
-        vStr.Length = 12 + 6;
-        ShiftAwayFromBit0(vStr, 12 - count + 6);
-        _ = DecToBin(version, 6, vStr, 0);
-    }
 
     /// <summary>
     /// Calculates the Error Correction Codewords (ECC) for a segment of data using the provided ECC information.
@@ -437,12 +381,6 @@ public partial class QRCodeGenerator : IDisposable
             poly[i] = new PolynomItem(GaloisField.GetIntValFromAlphaExp(poly[i].Coefficient), poly[i].Exponent);
         }
     }
-
-    /// <summary>
-    /// Checks if a character falls within a specified range.
-    /// </summary>
-    private static bool IsInRange(char c, char min, char max)
-        => (uint)(c - min) <= (uint)(max - min);
 
     /// <summary>
     /// Converts a segment of a BitArray representing QR code data into a polynomial,
@@ -562,47 +500,6 @@ public partial class QRCodeGenerator : IDisposable
         }
 
         return index;
-    }
-
-    /// <summary>
-    /// Converts an array of bytes into a BitArray, considering the proper bit order within each byte.
-    /// Unlike the constructor of BitArray, this function preserves the MSB-to-LSB order within each byte.
-    /// </summary>
-    /// <param name="byteArray">The byte array to convert into a BitArray.</param>
-    /// <param name="prefixZeros">The number of leading zeros to prepend to the resulting BitArray.</param>
-    /// <returns>A BitArray representing the bits of the input byteArray, with optional leading zeros.</returns>
-    private static BitArray ToBitArray(
-        ReadOnlySpan<byte> byteArray, // byte[] has an implicit cast to ReadOnlySpan<byte>
-        int prefixZeros = 0)
-    {
-        // Calculate the total number of bits in the resulting BitArray including the prefix zeros.
-        var bitArray = new BitArray((int)((uint)byteArray.Length * 8) + prefixZeros);
-        CopyToBitArray(byteArray, bitArray, prefixZeros);
-        return bitArray;
-    }
-
-    /// <summary>
-    /// Converts an array of bytes into a BitArray at a specified offset, considering the proper bit order within each byte.
-    /// Unlike the constructor of BitArray, this function preserves the MSB-to-LSB order within each byte.
-    /// </summary>
-    /// <param name="byteArray">The byte array to convert into a BitArray.</param>
-    /// <param name="bitArray">The target BitArray to write to.</param>
-    /// <param name="offset">The starting offset in the BitArray where bits will be written.</param>
-    private static void CopyToBitArray(
-        ReadOnlySpan<byte> byteArray, // byte[] has an implicit cast to ReadOnlySpan<byte>
-        BitArray bitArray,
-        int offset)
-    {
-        for (var i = 0; i < byteArray.Length; i++)
-        {
-            var byteVal = byteArray[i];
-            for (var j = 0; j < 8; j++)
-            {
-                // Set each bit in the BitArray based on the corresponding bit in the byte array.
-                // It shifts bits within the byte to align with the MSB-to-LSB order.
-                bitArray[(int)((uint)i * 8) + j + offset] = (byteVal & (1 << (7 - j))) != 0;
-            }
-        }
     }
 
     /// <summary>

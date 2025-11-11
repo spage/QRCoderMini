@@ -20,7 +20,7 @@ public class QRCodeData : IDisposable
     public QRCodeData()
     {
         Version = 2;
-        var size = 25;  //ModulesPerSideFromVersion(version) + (addPadding ? 8 : 0);
+        var size = 25;
         ModuleMatrix = new List<BitArray>(size);
         for (var i = 0; i < size; i++)
         {

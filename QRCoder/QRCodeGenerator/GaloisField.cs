@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -31,23 +29,11 @@ public partial class QRCodeGenerator
 
         /// <summary>
         /// Retrieves the exponent from the Galois field that corresponds to a given integer value.
-        /// Throws an exception if the integer value is zero, as zero does not have a logarithmic representation in the field.
+        /// If the integer value is zero, as zero does not have a logarithmic representation in the field.
         /// </summary>
         /// <returns></returns>
         public static int GetAlphaExpFromIntVal(int intVal)
-        {
-            if (intVal == 0)
-            {
-                ThrowIntValOutOfRangeException(); // Zero is not valid as it does not have an exponent representation.
-            }
-
-            return GaloisFieldByIntegerValue[intVal];
-
-            static void ThrowIntValOutOfRangeException()
-            {
-                throw new ArgumentOutOfRangeException(nameof(intVal), "The provided integer value is out of range, as zero is not representable.");
-            }
-        }
+            => GaloisFieldByIntegerValue[intVal];
 
         /// <summary>
         /// Normalizes a Galois field exponent to ensure it remains within the bounds of the field's size.
@@ -55,9 +41,6 @@ public partial class QRCodeGenerator
         /// </summary>
         /// <returns></returns>
         public static int ShrinkAlphaExp(int alphaExp)
-        {
-            Debug.Assert(alphaExp >= 0);
-            return (int)(((uint)alphaExp % 256) + ((uint)alphaExp / 256));
-        }
+            => (int)(((uint)alphaExp % 256) + ((uint)alphaExp / 256));
     }
 }
