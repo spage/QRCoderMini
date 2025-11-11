@@ -40,14 +40,6 @@ public partial class QRCodeGenerator
             }
 
             /// <summary>
-            /// Adds a blocked module at the specified coordinates.
-            /// </summary>
-            /// <param name="x">The x-coordinate of the module.</param>
-            /// <param name="y">The y-coordinate of the module.</param>
-            // public readonly void Add(int x, int y)
-            //     => blockedModules[y][x] = true;
-
-            /// <summary>
             /// Adds a blocked module defined by the specified rectangle.
             /// </summary>
             /// <param name="rect">The rectangle that defines the blocked module.</param>

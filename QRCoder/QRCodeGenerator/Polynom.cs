@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 
 namespace QRCoder;
 
@@ -19,11 +18,8 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Adds a polynomial term to the polynomial.
         /// </summary>
-        public void Add(PolynomItem item)
-        {
-            AssertCapacity(Count + 1);
+        public void Add(PolynomItem item) =>
             polyItems[Count++] = item;
-        }
 
         /// <summary>
         /// Removes the polynomial term at the specified index.
@@ -153,58 +149,11 @@ public partial class QRCodeGenerator
             QuickSort(0, Count - 1);
         }
 
-        /// <summary>
-        /// Returns a string that represents the polynomial in standard algebraic notation.
-        /// Example output: "a^2*x^3 + a^5*x^1 + a^3*x^0", which represents the polynomial 2x³ + 5x + 3.
-        /// </summary>
-        public override readonly string ToString()
-        {
-            var sb = new StringBuilder();
-
-            for (var i = 0; i < Count; i++)
-            {
-                PolynomItem polyItem = polyItems[i];
-                _ = sb.Append("a^" + polyItem.Coefficient + "*x^" + polyItem.Exponent + " + ");
-            }
-
-            // Remove the trailing " + " if the string builder has added terms
-            if (sb.Length > 0)
-            {
-                sb.Length -= 3;
-            }
-
-            return sb.ToString();
-        }
-
         /// <inheritdoc/>
         public void Dispose()
         {
             ReturnArray(polyItems);
             polyItems = null!;
-        }
-
-        /// <summary>
-        /// Ensures that the polynomial has enough capacity to store the specified number of polynomial terms.
-        /// </summary>
-        private readonly void AssertCapacity(int min)
-        {
-            if (polyItems.Length < min)
-            {
-                // All math by QRCoder should be done with fixed polynomials, so we don't need to grow the capacity.
-                ThrowNotSupportedException();
-
-                // Sample code for growing the capacity:
-                // var newArray = RentArray(Math.Max(min - 1, 8) * 2); // Grow by 2x, but at least by 8
-                // Array.Copy(_polyItems, newArray, _length);
-                // ReturnArray(_polyItems);
-                // _polyItems = newArray;
-            }
-
-            [StackTraceHidden]
-            static void ThrowNotSupportedException()
-            {
-                throw new NotSupportedException("The polynomial capacity is fixed and cannot be increased.");
-            }
         }
 
         /// <summary>

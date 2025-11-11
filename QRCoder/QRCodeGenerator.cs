@@ -28,39 +28,8 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="eciMode">Which ECI mode shall be used?.</param>
     /// <param name="requestedVersion">Set fixed QR code target version.</param>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    // #pragma warning disable CA1822 // Mark members as static
-    //     public QRCodeData CreateQrCode(string plainText)
-    // #pragma warning restore CA1822 // Mark members as static
-    //         => GenerateQrCode(plainText);
-
-    /// <summary>
-    /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
-    /// </summary>
-    /// <param name="binaryData">A byte array which shall be encoded/stored in the QR code.</param>
-    /// <param name="eccLevel">The level of error correction data.</param>
-    /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    // #pragma warning disable CA1822 // Mark members as static
-    //     public QRCodeData CreateQrCode(byte[] binaryData, ECCLevel eccLevel)
-    // #pragma warning restore CA1822 // Mark members as static
-    //         => GenerateQrCode(binaryData);
-
-    /// <summary>
-    /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
-    /// </summary>
-    /// <param name="plainText">The payload which shall be encoded in the QR code.</param>
-    /// <param name="eccLevel">The level of error correction data.</param>
-    /// <param name="forceUtf8">Shall the generator be forced to work in UTF-8 mode?.</param>
-    /// <param name="utf8BOM">Should the byte-order-mark be used?.</param>
-    /// <param name="eciMode">Which ECI mode shall be used?.</param>
-    /// <param name="requestedVersion">Set fixed QR code target version.</param>
-    /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
     public static QRCodeData GenerateQrCode(string plainText)
     {
-        //eccLevel = ECCLevel.M;  // only valid level ValidateECCLevel(eccLevel);
-
-        // Determine the appropriate version based on segment bit length
-        //var version = 2;  //DetermineVersion(segment, eccLevel, requestedVersion);
-
         // Create data segment from plain text
         DataSegment segment = new AlphanumericDataSegment(plainText);
 
@@ -68,163 +37,6 @@ public partial class QRCodeGenerator : IDisposable
         var completeBitArray = segment.ToBitArray();
         return GenerateQrCode(completeBitArray);
     }
-
-    /// <summary>
-    /// Creates a data segment from plain text, encoding it appropriately.
-    /// </summary>
-    // private static DataSegment CreateDataSegment(string plainText, bool forceUtf8, bool utf8BOM, EciMode eciMode)
-    // {
-    //     return new AlphanumericDataSegment(plainText);
-
-    //     // EncodingMode encoding = EncodingMode.Alphanumeric;
-
-    //     // // Use specialized segment classes based on encoding mode
-    //     // return encoding switch
-    //     // {
-    //     //     EncodingMode.Alphanumeric => new AlphanumericDataSegment(plainText),
-    //     //     EncodingMode.Byte => throw new NotImplementedException(),
-    //     //     EncodingMode.Numeric => throw new NotImplementedException(),
-    //     //     EncodingMode.Kanji => throw new NotImplementedException(),
-    //     //     EncodingMode.ECI => throw new NotImplementedException(),
-    //     //     _ => throw new InvalidOperationException($"Unsupported encoding mode: {encoding}"),
-    //     // };
-    // }
-
-    /// <summary>
-    /// Determines the appropriate QR code version based on the data segment and error correction level.
-    /// Validates that the data fits within the requested version, or finds the minimum version if not specified.
-    /// </summary>
-    // private static int DetermineVersion(DataSegment segment, ECCLevel eccLevel, int version)
-    // {
-    //     if (!CapacityTables.TryCalculateMinimumVersion(segment, eccLevel, out var minVersion))
-    //     {
-    //         return Throw(eccLevel, segment.EncodingMode, version == -1 ? 40 : version);
-    //     }
-    //     else if (version == -1)
-    //     {
-    //         return minVersion;
-    //     }
-    //     else
-    //     {
-    //         // Version was passed as fixed version via parameter. Thus let's check if chosen version is valid.
-    //         if (minVersion > version)
-    //         {
-    //             // Use a throw-helper to avoid allocating a closure
-    //             return Throw(eccLevel, segment.EncodingMode, version);
-    //         }
-
-    //         return version;
-    //     }
-
-    //     static int Throw(ECCLevel eccLevel, EncodingMode encoding, int version)
-    //     {
-    //         var maxSizeByte = CapacityTables.GetVersionInfo(version).Details.First(x => x.ErrorCorrectionLevel == eccLevel).CapacityDict[encoding];
-    //         throw new Exceptions.DataTooLongException(eccLevel.ToString(), encoding.ToString(), version, maxSizeByte);
-    //     }
-    // }
-
-    /// <summary>
-    /// Calculates the Micro QR code data which then can be used in one of the rendering classes to generate a graphical representation.
-    /// </summary>
-    /// <param name="plainText">The payload which shall be encoded in the QR code.</param>
-    /// <param name="eccLevel">The level of error correction data.</param>
-    /// <param name="requestedVersion">Set fixed Micro QR code target version; must be -1 to -4 representing M1 to M4, or 0 for default.</param>
-    /// <exception cref="Exceptions.DataTooLongException">Thrown when the payload is too big to be encoded in a QR code.</exception>
-    /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    // public static QRCodeData GenerateMicroQrCode(string plainText, ECCLevel eccLevel = ECCLevel.Default, int requestedVersion = 0)
-    // {
-    //     if (requestedVersion is < -4 or > 0)
-    //     {
-    //         throw new ArgumentOutOfRangeException(nameof(requestedVersion), requestedVersion, "Requested version must be -1 to -4 representing M1 to M4, or 0 for default.");
-    //     }
-
-    //     _ = ValidateECCLevel(eccLevel);
-    //     if (eccLevel == ECCLevel.H)
-    //     {
-    //         throw new ArgumentOutOfRangeException(nameof(eccLevel), eccLevel, "Micro QR codes does not support error correction level H.");
-    //     }
-
-    //     if (eccLevel == ECCLevel.Q && requestedVersion == 0)
-    //     {
-    //         requestedVersion = -4; // If Q level is specified without a version, automatically select M4 since Q is only supported on M4
-    //     }
-
-    //     if (eccLevel == ECCLevel.Q && requestedVersion != -4)
-    //     {
-    //         throw new ArgumentOutOfRangeException(nameof(eccLevel), eccLevel, "Micro QR codes only supports error correction level Q for version M4.");
-    //     }
-
-    //     if (eccLevel != ECCLevel.Default && requestedVersion == -1)
-    //     {
-    //         throw new ArgumentOutOfRangeException(nameof(eccLevel), eccLevel, "Please specify ECCLevel.Default for version M1.");
-    //     }
-
-    //     ArgumentNullException.ThrowIfNull(plainText);
-
-    //     EncodingMode encoding = EncodingMode.Alphanumeric;
-    //     BitArray codedText = PlainTextToBinary(plainText, encoding, EciMode.Default, false, false);
-    //     var dataInputLength = GetDataLength(encoding, plainText, codedText, false);
-    //     var version = requestedVersion;
-    //     var minVersion = 2; //CapacityTables.CalculateMinimumMicroVersion(dataInputLength, encoding, eccLevel);
-
-    //     if (version == 0)
-    //     {
-    //         version = minVersion;
-    //     }
-    //     else
-    //     {
-    //         // Version was passed as fixed version via parameter. Thus let's check if chosen version is valid.
-    //         if (minVersion < version)
-    //         {
-    //             var matchedEncoding = CapacityTables.GetVersionInfo(version).Details
-    //                 .First(x => x.ErrorCorrectionLevel == eccLevel || (eccLevel == ECCLevel.Default && x.ErrorCorrectionLevel == ECCLevel.L))
-    //                 .CapacityDict.TryGetValue(encoding, out var maxSizeByte);
-    //             if (!matchedEncoding)
-    //             {
-    //                 throw new InvalidOperationException("Required encoding is not supported for this version.");
-    //             }
-
-    //             throw new Exceptions.DataTooLongException(eccLevel.ToString(), encoding.ToString(), version, maxSizeByte);
-    //         }
-    //     }
-
-    //     if (version < -1 && eccLevel == ECCLevel.Default)
-    //     {
-    //         eccLevel = ECCLevel.L;
-    //     }
-
-    //     var modeIndicatorLength = -version - 1; // 0 for M1, 1 for M2, 2 for M3, 3 for M4
-    //     var countIndicatorLength = GetCountIndicatorLength(version, encoding);
-    //     var completeBitArrayLength = modeIndicatorLength + countIndicatorLength + codedText.Length;
-
-    //     var completeBitArray = new BitArray(completeBitArrayLength);
-
-    //     // write mode indicator
-    //     var completeBitArrayIndex = 0;
-    //     if (version < 0)
-    //     {
-    //         var encodingValue =
-    //             encoding == EncodingMode.Numeric ? 0 :
-    //             encoding == EncodingMode.Alphanumeric ? 1 :
-    //             encoding == EncodingMode.Byte ? 2 : 3;
-    //         completeBitArrayIndex = DecToBin(encodingValue, modeIndicatorLength, completeBitArray, completeBitArrayIndex);
-    //     }
-    //     else
-    //     {
-    //         completeBitArrayIndex = DecToBin((int)encoding, 4, completeBitArray, completeBitArrayIndex);
-    //     }
-
-    //     // write count indicator
-    //     completeBitArrayIndex = DecToBin(dataInputLength, countIndicatorLength, completeBitArray, completeBitArrayIndex);
-
-    //     // write data
-    //     for (var i = 0; i < codedText.Length; i++)
-    //     {
-    //         completeBitArray[completeBitArrayIndex++] = codedText[i];
-    //     }
-
-    //     return GenerateQrCode(completeBitArray, eccLevel, version);
-    // }
 
     /// <summary>
     /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
@@ -235,32 +47,15 @@ public partial class QRCodeGenerator : IDisposable
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
     public static QRCodeData GenerateQrCode(byte[] binaryData)
     {
-        //eccLevel = ECCLevel.M;  // only valid level ValidateECCLevel(eccLevel);
-        //var version = 2;  //CapacityTables.CalculateMinimumVersion(binaryData.Length, EncodingMode.Byte, eccLevel);
-
-        var countIndicatorLen = 9; //GetCountIndicatorLength(version, EncodingMode.Byte);
-
         // Convert byte array to bit array, with prefix padding for mode indicator and count indicator
-        BitArray bitArray = ToBitArray(binaryData, prefixZeros: 4 + countIndicatorLen);
+        BitArray bitArray = ToBitArray(binaryData, prefixZeros: 4 + 9);
 
         // Add mode indicator and count indicator
         var index = DecToBin((int)EncodingMode.Byte, 4, bitArray, 0);
-        _ = DecToBin(binaryData.Length, countIndicatorLen, bitArray, index);
+        _ = DecToBin(binaryData.Length, 9, bitArray, index);
 
         return GenerateQrCode(bitArray);
     }
-
-    /// <summary>
-    /// Validates the specified error correction level.
-    /// Returns the provided level if it is valid, or the level M if the provided level is Default.
-    /// Throws an exception if an invalid level is provided.
-    /// </summary>
-    // private static ECCLevel ValidateECCLevel(ECCLevel eccLevel) => eccLevel switch
-    // {
-    //     ECCLevel.L or ECCLevel.M or ECCLevel.Q or ECCLevel.H => eccLevel,
-    //     ECCLevel.Default => ECCLevel.M,
-    //     _ => throw new ArgumentOutOfRangeException(nameof(eccLevel), eccLevel, "Invalid error correction level."),
-    // };
 
     private static readonly BitArray repeatingPattern = new(
         new bool[] { true, true, true, false, true, true, false, false, false, false, false, true, false, false, false, true });
@@ -317,13 +112,6 @@ public partial class QRCodeGenerator : IDisposable
 
                 // compute padding length
                 var padLength = 4;
-                // {
-                //     > 0 => 4,
-                //     -1 => 3,
-                //     -2 => 5,
-                //     -3 => 7,
-                //     _ => 9,
-                // };
 
                 // pad with zeros (or less if not enough room)
                 index += padLength;
@@ -333,16 +121,6 @@ public partial class QRCodeGenerator : IDisposable
                 {
                     index += 8 - (int)((uint)index % 8);
                 }
-
-                // for m1 and m3 sizes don't fill last 4 bits with repeating pattern
-                // if (version == -1)
-                // {
-                //     dataLength -= 4;
-                // }
-                // if (version == -3)
-                // {
-                //     dataLength -= 4;
-                // }
 
                 // pad with repeating pattern
                 var repeatingPatternIndex = 0;
@@ -391,11 +169,6 @@ public partial class QRCodeGenerator : IDisposable
         {
             var length = 0;
             var codewords = Math.Max(eccInfo.CodewordsInGroup1, eccInfo.CodewordsInGroup2);
-            // if (version is (-1) or (-3))
-            // {
-            //     codewords--;
-            //     length += 4;
-            // }
 
             for (var i = 0; i < codewords; i++)
             {
@@ -419,7 +192,7 @@ public partial class QRCodeGenerator : IDisposable
                 }
             }
 
-            length += 7;  //CapacityTables.GetRemainderBits(version);
+            length += 7;
             return length;
         }
 
@@ -428,11 +201,6 @@ public partial class QRCodeGenerator : IDisposable
         {
             var data = new BitArray(interleavedLength);
             var pos = 0;
-            //var codewords = Math.Max(eccInfo.CodewordsInGroup1, eccInfo.CodewordsInGroup2);
-            // if (version is (-1) or (-3))
-            // {
-            //     codewords--;
-            // }
 
             for (var i = 0; i < Math.Max(eccInfo.CodewordsInGroup1, eccInfo.CodewordsInGroup2); i++)
             {
@@ -469,12 +237,12 @@ public partial class QRCodeGenerator : IDisposable
         {
             // NOTE: qr HAS NO BORDER NOW
             var qr = new QRCodeData();
-            var size = qr.ModuleMatrix.Count; // NO BOREDER ADJUST - 8;
+            var size = qr.ModuleMatrix.Count;
             var tempBitArray = new BitArray(18); // version string requires 18 bits
             using (var blockedModules = new ModulePlacer.BlockedModules(size))
             {
                 ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
-                ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules); //likely wrong
+                ModulePlacer.ReserveSeperatorAreas(2, size, blockedModules);
                 ModulePlacer.PlaceAlignmentPatterns(qr, AlignmentPatterns.alignmentPattern, blockedModules);
                 ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
                 ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
@@ -491,7 +259,6 @@ public partial class QRCodeGenerator : IDisposable
 
     private static readonly BitArray getFormatGenerator = new(new bool[] { true, false, true, false, false, true, true, false, true, true, true });
     private static readonly BitArray getFormatMask = new(new bool[] { true, false, true, false, true, false, false, false, false, false, true, false, false, true, false });
-    private static readonly BitArray getFormatMicroMask = new(new bool[] { true, false, false, false, true, false, false, false, true, false, false, false, true, false, true });
 
     /// <summary>
     /// Generates a BitArray containing the format string for a QR code based on the error correction level and mask pattern version.
@@ -505,14 +272,6 @@ public partial class QRCodeGenerator : IDisposable
     {
         fStrEcc.Length = 15;
         fStrEcc.SetAll(false);
-        // if (version < 0)
-        // {
-        //     WriteMicroEccLevelAndVersion();
-        // }
-        // else
-        // {
-        //     WriteEccLevelAndVersion();
-        // }
         WriteEccLevelAndVersion();
 
         // Apply the format generator polynomial to add error correction to the format string.
@@ -535,14 +294,6 @@ public partial class QRCodeGenerator : IDisposable
         // Prefix the error correction bits with the ECC level and version number.
         fStrEcc.Length = 10 + 5;
         ShiftAwayFromBit0(fStrEcc, 10 - count + 5);
-        // if (version < 0)
-        // {
-        //     WriteMicroEccLevelAndVersion();
-        // }
-        // else
-        // {
-        //     WriteEccLevelAndVersion();
-        // }
         WriteEccLevelAndVersion();
 
         // XOR the format string with a predefined mask to add robustness against errors.
@@ -550,80 +301,9 @@ public partial class QRCodeGenerator : IDisposable
 
         void WriteEccLevelAndVersion()
         {
-            // switch (level)
-            // {
-            //     case ECCLevel.L: // 01
-            //         fStrEcc[1] = true;
-            //         break;
-            //     case ECCLevel.H: // 10
-            //         fStrEcc[0] = true;
-            //         break;
-            //     case ECCLevel.Q: // 11
-            //         fStrEcc[0] = true;
-            //         fStrEcc[1] = true;
-            //         break;
-            //     case ECCLevel.Default:
-            //         break;
-            //     case ECCLevel.M:
-            //         break;
-            //     default: // M: 00
-            //         break;
-            // }
-
             // Insert the 3-bit mask version directly after the error correction level bits.
             _ = DecToBin(maskVersion, 3, fStrEcc, 2);
         }
-
-        // void WriteMicroEccLevelAndVersion()
-        // {
-        //     switch (version)
-        //     {
-        //         case -1: // M1
-        //             break;
-        //         case -2: // M2
-        //             fStrEcc[level == ECCLevel.L ? 2 : 1] = true; // 001 for L and 010 for M
-        //             break;
-        //         case -3: // M3
-        //             if (level == ECCLevel.L)
-        //             {
-        //                 fStrEcc[1] = true; // 011 for L
-        //                 fStrEcc[2] = true;
-        //             }
-        //             else
-        //             {
-        //                 fStrEcc[0] = true; // 100 for M
-        //             }
-
-        //             break;
-        //         default: // M4
-        //             fStrEcc[0] = true;
-        //             if (level == ECCLevel.L) // 101 for L
-        //             {
-        //                 fStrEcc[2] = true;
-        //             }
-        //             else if (level == ECCLevel.M) // 110 for M
-        //             {
-        //                 fStrEcc[1] = true;
-        //             }
-        //             else // 111 for Q
-        //             {
-        //                 fStrEcc[1] = true;
-        //                 fStrEcc[2] = true;
-        //             }
-
-        //             break;
-        //     }
-
-        //     // Insert the 2-bit mask version directly after the version / error correction level bits.
-        //     var microMaskVersion = maskVersion switch
-        //     {
-        //         1 => 0,
-        //         4 => 1,
-        //         6 => 2,
-        //         _ => 3,
-        //     };
-        //     _ = DecToBin(microMaskVersion, 2, fStrEcc, 3);
-        // }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -891,106 +571,6 @@ public partial class QRCodeGenerator : IDisposable
 
         return index;
     }
-
-    /// <summary>
-    /// Determines the number of bits used to indicate the count of characters in a segment, depending on the QR code version and the encoding mode.
-    /// </summary>
-    /// <param name="version">The version of the QR code, which influences the number of bits due to increasing data capacity.</param>
-    /// <param name="encMode">The encoding mode (e.g., Numeric, Alphanumeric, Byte) used for the data segment.</param>
-    /// <returns>The number of bits needed to represent the character count in the specified encoding mode and version.</returns>
-    // private static int GetCountIndicatorLength(int version, EncodingMode encMode)
-    // {
-    //     return 9;
-    //     // Different versions and encoding modes require different lengths of bits to represent the character count efficiently
-    //     // if (version == -1)
-    //     // {
-    //     //     return 3;
-    //     // }
-    //     // else if (version == -2)
-    //     // {
-    //     //     return encMode == EncodingMode.Numeric ? 4 : 3;
-    //     // }
-    //     // else if (version == -3)
-    //     // {
-    //     //     return encMode == EncodingMode.Numeric ? 5 : encMode == EncodingMode.Kanji ? 3 : 4;
-    //     // }
-    //     // else if (version == -4)
-    //     // {
-    //     //     return encMode == EncodingMode.Numeric ? 6 : encMode == EncodingMode.Kanji ? 4 : 5;
-    //     // }
-    //     // else if (version < 10)
-    //     // {
-    //     //     return encMode == EncodingMode.Numeric ? 10 : encMode == EncodingMode.Alphanumeric ? 9 : 8;
-    //     // }
-    //     // else if (version < 27)
-    //     // {
-    //     //     return encMode == EncodingMode.Numeric ? 12 : encMode == EncodingMode.Alphanumeric ? 11 : encMode == EncodingMode.Byte ? 16 : 10;
-    //     // }
-    //     // else
-    //     // {
-    //     //     return encMode == EncodingMode.Numeric ? 14 : encMode == EncodingMode.Alphanumeric ? 13 : encMode == EncodingMode.Byte ? 16 : 12;
-    //     // }
-    // }
-
-    /// <summary>
-    /// Calculates the data length based on the encoding mode, text content, and whether UTF-8 is forced.
-    /// </summary>
-    /// <param name="encoding">The encoding mode used for the QR code data.</param>
-    /// <param name="plainText">The plain text input to be encoded.</param>
-    /// <param name="codedText">A BitArray representing the binary data of the encoded text.</param>
-    /// <param name="forceUtf8">Flag to determine if UTF-8 encoding should be enforced.</param>
-    /// <returns>The length of data in units appropriate to the encoding (bytes or characters).</returns>
-    // private static int GetDataLength(EncodingMode encoding, string plainText, BitArray codedText, bool forceUtf8)
-    // {
-    //     // If UTF-8 is forced or the text is detected as UTF-8, return the number of bytes, otherwise return the character count.
-    //     return forceUtf8 || IsUtf8() ? (int)((uint)codedText.Length / 8) : plainText.Length;
-
-    //     bool IsUtf8()
-    //     {
-    //         return encoding == EncodingMode.Byte && (forceUtf8 || !IsValidISO(plainText));
-    //     }
-    // }
-
-    /// <summary>
-    /// Checks if the given string can be accurately represented and retrieved in ISO-8859-1 encoding.
-    /// </summary>
-    // private static bool IsValidISO(string input)
-    // {
-    //     // ISO-8859-1 contains the same characters as UTF-16 for the range 0x00-0xFF.
-    //     //   0x00-0x7F: ASCII (0-127)
-    //     //   0x80-0x9F: C1 control characters (128-159)
-    //     //   0xA0-0xFF: Extended Latin (160-255)
-    //     foreach (var c in input)
-    //     {
-    //         if (c > 0xFF)
-    //         {
-    //             return false;
-    //         }
-    //     }
-
-    //     return true;
-    // }
-
-    /// <summary>
-    /// Converts plain text to a binary format suitable for QR code generation, based on the specified encoding mode.
-    /// </summary>
-    /// <param name="plainText">The text to be encoded.</param>
-    /// <param name="encMode">The encoding mode.</param>
-    /// <param name="eciMode">The ECI mode specifying the character encoding to use.</param>
-    /// <param name="utf8BOM">Flag indicating whether to prepend a UTF-8 Byte Order Mark.</param>
-    /// <param name="forceUtf8">Flag indicating whether UTF-8 encoding is forced.</param>
-    /// <returns>A BitArray containing the binary representation of the encoded data.</returns>
-    // private static BitArray PlainTextToBinary(string plainText, EncodingMode encMode, EciMode eciMode, bool utf8BOM, bool forceUtf8) => encMode switch
-    // {
-    //     EncodingMode.Alphanumeric => AlphanumericEncoder.GetBitArray(plainText),
-    //     EncodingMode.Byte => PlainTextToBinaryByte(plainText, eciMode, utf8BOM, forceUtf8),
-    //     EncodingMode.Numeric => throw new NotImplementedException(),
-    //     EncodingMode.Kanji => throw new NotImplementedException(),
-    //     EncodingMode.ECI => throw new NotImplementedException(),
-    //     _ => emptyBitArray,
-    // };
-
-    //private static readonly BitArray emptyBitArray = new(0);
 
     /// <summary>
     /// Converts an array of bytes into a BitArray, considering the proper bit order within each byte.
