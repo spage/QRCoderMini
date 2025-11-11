@@ -98,7 +98,7 @@ public partial class QRCodeGenerator
                 }
 
                 // Place format information using the current mask pattern.
-                GetFormatString(formatStr, 2, ECCLevel.M, maskPattern);
+                GetFormatString(formatStr, maskPattern);
                 PlaceFormat(qrTemp, formatStr, false);
 
                 // Place version information if applicable.

@@ -241,7 +241,7 @@ public partial class QRCodeGenerator : IDisposable
                 ModulePlacer.ReserveVersionAreas(size, blockedModules);
                 ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
                 var maskVersion = ModulePlacer.MaskCode(qr, blockedModules);
-                GetFormatString(tempBitArray, 2, ECCLevel.M, maskVersion);
+                GetFormatString(tempBitArray, maskVersion);
                 ModulePlacer.PlaceFormat(qr, tempBitArray, false);
             }
 
@@ -260,7 +260,7 @@ public partial class QRCodeGenerator : IDisposable
     /// <param name="version">The version number of the QR Code (1-40, or -1 to -4 for Micro QR codes).</param>
     /// <param name="level">The error correction level to be encoded in the format string.</param>
     /// <param name="maskVersion">The mask pattern version to be encoded in the format string.</param>
-    private static void GetFormatString(BitArray fStrEcc, int version, ECCLevel level, int maskVersion)
+    private static void GetFormatString(BitArray fStrEcc, int maskVersion)
     {
         fStrEcc.Length = 15;
         fStrEcc.SetAll(false);
