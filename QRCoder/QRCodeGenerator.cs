@@ -440,12 +440,12 @@ public partial class QRCodeGenerator : IDisposable
                 {
                     if ((uint)codeBlock.CodeWordsLength / 8 > i)
                     {
-                        //pos = bitArray.CopyTo(data, (int)((uint)i * 8) + codeBlock.CodeWordsOffset, pos, 8);
-                        for (var j = 0; j < 8; j++)
-                        {
-                            data[pos + j] = bitArray[(int)((uint)j * 8) + codeBlock.CodeWordsOffset + j];
-                        }
-                        pos += 8;
+                        pos = bitArray.CopyTo(data, (int)((uint)i * 8) + codeBlock.CodeWordsOffset, pos, 8);
+                        // for (var j = 0; j < 8; j++)
+                        // {
+                        //     data[pos + j] = bitArray[(int)((uint)j * 8) + codeBlock.CodeWordsOffset + j];
+                        // }
+                        // pos += 8;
                     }
                 }
             }

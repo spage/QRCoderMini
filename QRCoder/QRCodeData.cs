@@ -168,10 +168,10 @@ public class QRCodeData : IDisposable
         {
             // NOTE: this is adding BS like a QRR file format with row size...maybe modify this to ONLY produce the 25x25 matrix
             // Add header - signature ("QRR")
-            targetStream.Write([0x51, 0x52, 0x52, 0x00]);
+            //targetStream.Write([0x51, 0x52, 0x52, 0x00]);
 
             // Add header - rowsize
-            targetStream.WriteByte((byte)ModuleMatrix.Count);
+            //targetStream.WriteByte((byte)ModuleMatrix.Count);
 
             // Build data queue
             var capacity = (ModuleMatrix.Count * ModuleMatrix.Count) + 7; // Total modules + max padding for byte alignment
@@ -206,7 +206,7 @@ public class QRCodeData : IDisposable
         {
             // Close compression streams to flush data
             //deflateStream?.Dispose();
-            // gzipStream?.Dispose();
+            //gzipStream?.Dispose();
         }
 
         return output.ToArray();

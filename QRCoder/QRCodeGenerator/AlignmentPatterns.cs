@@ -12,8 +12,7 @@ public partial class QRCodeGenerator
         /// </summary>
         public static readonly List<Point> alignmentPattern =
         [
-            //new Point(4, 4), new Point(4, 16), new Point(16, 4), new Point(16, 16)
-            new Point(0, 0), new Point(0, 12), new Point(12, 0), new Point(12, 12)
+            new Point(4, 4), new Point(4, 16), new Point(16, 4), new Point(16, 16)
         ];
 
         //     /// <summary>
