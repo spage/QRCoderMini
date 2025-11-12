@@ -201,15 +201,15 @@ public static partial class QRCodeGenerator
             var tempBitArray = new BitArray(18); // version string requires 18 bits
             var blockedModules = new ModulePlacer.BlockedModules(size);
             ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
-            ModulePlacer.ReserveSeperatorAreas(size, blockedModules);
+            ModulePlacer.ReserveSeperatorAreas(blockedModules);
             ModulePlacer.PlaceAlignmentPatterns(qr, blockedModules);
             ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
-            ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
-            ModulePlacer.ReserveVersionAreas(size, blockedModules);
+            ModulePlacer.PlaceDarkModule(qr, blockedModules);
+            ModulePlacer.ReserveVersionAreas(blockedModules);
             ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
             var maskVersion = ModulePlacer.MaskCode(qr, blockedModules);
             GetFormatString(tempBitArray, maskVersion);
-            ModulePlacer.PlaceFormat(qr, tempBitArray, false);
+            ModulePlacer.PlaceFormat(qr, tempBitArray);
 
             return qr;
         }

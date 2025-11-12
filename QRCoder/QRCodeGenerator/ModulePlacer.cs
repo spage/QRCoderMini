@@ -7,41 +7,12 @@ public partial class QRCodeGenerator
     private static partial class ModulePlacer
     {
         /// <summary>
-        /// Places the version information on the QR code matrix for versions 7 and higher. Version information
-        /// is encoded into two small rectangular areas near the bottom left and top right corners outside the timing patterns.
-        /// </summary>
-        /// <param name="qrCode">The QR code data structure to modify.</param>
-        /// <param name="versionStr">The bit array containing the version information.</param>
-        /// <param name="offset">Indicates whether an offset should be applied to the version information placement.</param>
-        public static void PlaceVersion(QRCodeData qrCode, BitArray versionStr, bool offset)
-        {
-            var offsetValue = offset ? 4 : 0;
-            var size = qrCode.ModuleMatrix.Count - offsetValue - offsetValue;
-
-            // Loop through each module position intended for version information, placed adjacent to the separators.
-            for (var x = 0; x < 6; x++)
-            {
-                for (var y = 0; y < 3; y++)
-                {
-                    // Apply the version bits to the corresponding modules on the matrix, mapping the bits from the versionStr array.
-                    qrCode.ModuleMatrix[y + size - 11 + offsetValue][x + offsetValue] = versionStr[17 - ((x * 3) + y)];
-                    qrCode.ModuleMatrix[x + offsetValue][y + size - 11 + offsetValue] = versionStr[17 - ((x * 3) + y)];
-                }
-            }
-        }
-
-        /// <summary>
         /// Places the format information on the QR code, encoding the error correction level and mask pattern used.
         /// </summary>
         /// <param name="qrCode">The QR code data structure to modify.</param>
         /// <param name="formatStr">The bit array containing the format information.</param>
-        /// <param name="offset">Specifies whether an offset should be applied.</param>
-        public static void PlaceFormat(QRCodeData qrCode, BitArray formatStr, bool offset)
+        public static void PlaceFormat(QRCodeData qrCode, BitArray formatStr)
         {
-            //var isMicro = qrCode.Version < 0; // Negative versions indicate Micro QR codes.
-            var offsetValue = offset ? 4 : 0;
-            var size = qrCode.ModuleMatrix.Count - offsetValue - offsetValue;
-
             // The bit pattern is considered an entire 'word' and LSB goes in position 0
             // So, we need to reverse the order of the generated bit pattern, hence the (14 - i) below
             for (var i = 0; i < 15; i++)
@@ -51,11 +22,11 @@ public partial class QRCodeGenerator
                 // Standard QR format positions
                 x1 = i < 8 ? 8 : i == 8 ? 7 : 14 - i;
                 y1 = i < 6 ? i : i < 7 ? i + 1 : 8;
-                x2 = i < 8 ? size - 1 - i : 8;
-                y2 = i < 8 ? 8 : size - (15 - i);
+                x2 = i < 8 ? 25 - 1 - i : 8;
+                y2 = i < 8 ? 8 : 25 - (15 - i);
 
-                qrCode.ModuleMatrix[y1 + offsetValue][x1 + offsetValue] = formatStr[14 - i];
-                qrCode.ModuleMatrix[y2 + offsetValue][x2 + offsetValue] = formatStr[14 - i];
+                qrCode.ModuleMatrix[y1][x1] = formatStr[14 - i];
+                qrCode.ModuleMatrix[y2][x2] = formatStr[14 - i];
             }
         }
 
@@ -73,12 +44,9 @@ public partial class QRCodeGenerator
             var selectedPattern = -1;        // no pattern selected yet
             var patternScore = int.MaxValue; // lower score is better
 
-            var size = qrCode.ModuleMatrix.Count;
-
             // Temporary QRCodeData object to test different mask patterns without altering the original.
             var qrTemp = new QRCodeData();
-            // NOTE: qrTemp NO BORDER
-            BitArray? versionString = null;
+
 
             var formatStr = new BitArray(15);
             for (var maskPattern = 0; maskPattern < 8; maskPattern++)
@@ -87,11 +55,11 @@ public partial class QRCodeGenerator
 
                 // Reset the temporary QR code to the current state of the actual QR code
                 // Reuse existing BitArray instances to avoid allocations
-                for (var y = 0; y < size; y++)
+                for (var y = 0; y < 25; y++)
                 {
                     BitArray sourceRow = qrCode.ModuleMatrix[y];
                     BitArray destRow = qrTemp.ModuleMatrix[y];
-                    for (var x = 0; x < size; x++)
+                    for (var x = 0; x < 25; x++)
                     {
                         destRow[x] = sourceRow[x];
                     }
@@ -99,16 +67,10 @@ public partial class QRCodeGenerator
 
                 // Place format information using the current mask pattern.
                 GetFormatString(formatStr, maskPattern);
-                PlaceFormat(qrTemp, formatStr, false);
-
-                // Place version information if applicable.
-                if (versionString != null) // aka if (version >= 7)
-                {
-                    PlaceVersion(qrTemp, versionString, false);
-                }
+                PlaceFormat(qrTemp, formatStr);
 
                 // Apply the mask pattern and calculate the score.
-                for (var x = 0; x < size; x++)
+                for (var x = 0; x < 25; x++)
                 {
                     for (var y = 0; y < x; y++)
                     {
@@ -138,7 +100,7 @@ public partial class QRCodeGenerator
 
             // Apply the best mask pattern to the actual QR code.
             Func<int, int, bool> selectedPatternFunc = MaskPattern.Patterns[selectedPattern];
-            for (var x = 0; x < size; x++)
+            for (var x = 0; x < 25; x++)
             {
                 for (var y = 0; y < x; y++)
                 {
@@ -166,13 +128,12 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">A list of rectangles representing areas within the QR code matrix that should not be modified because they contain other necessary information like format and version info.</param>
         public static void PlaceDataWords(QRCodeData qrCode, BitArray data, BlockedModules blockedModules)
         {
-            var size = qrCode.ModuleMatrix.Count;// - 8; // Get the size of the QR code matrix.
             var up = true; // A boolean flag used to alternate the direction of filling data: up or down.
             var index = 0; // Index to track the current bit position in the data BitArray.
             var count = data.Length; // Total number of data bits to place.
 
             // Loop from the rightmost column to the leftmost column, skipping one column each time.
-            for (var x = size - 1; x >= 0; x -= 2)
+            for (var x = 25 - 1; x >= 0; x -= 2)
             {
                 // Skip the timing pattern column at position 6 (for normal QR codes only, not Micro QR codes).
                 if (x == 6)
@@ -181,10 +142,10 @@ public partial class QRCodeGenerator
                 }
 
                 // Loop through each row in the current column set.
-                for (var yMod = 1; yMod <= size; yMod++)
+                for (var yMod = 1; yMod <= 25; yMod++)
                 {
                     // Determine the actual y position based on the current fill direction.
-                    var y = up ? size - yMod : yMod - 1;
+                    var y = up ? 25 - yMod : yMod - 1;
 
                     // Place data if within data length and current position is not blocked.
                     if (index < count && !blockedModules.IsBlocked(x, y))
@@ -207,55 +168,50 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Reserves separator areas around the positioning patterns of a QR code to ensure that these crucial areas remain unmodified during data placement.
         /// </summary>
-        /// <param name="version">The version of the QR code, which determines the number of finder patterns.</param>
-        /// <param name="size">The size of the QR code matrix.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten.</param>
-        public static void ReserveSeperatorAreas(int size, BlockedModules blockedModules)
+        public static void ReserveSeperatorAreas(BlockedModules blockedModules)
         {
             // Block areas around the top-left finder pattern
             blockedModules.Add(new Rectangle(7, 0, 1, 8));        // Vertical block near the top left finder pattern
             blockedModules.Add(new Rectangle(0, 7, 7, 1));        // Horizontal block near the top left finder pattern
 
             // Block areas around the bottom-left finder pattern
-            blockedModules.Add(new Rectangle(0, size - 8, 8, 1)); // Horizontal block near the bottom left finder pattern
-            blockedModules.Add(new Rectangle(7, size - 7, 1, 7)); // Vertical block near the bottom left finder pattern
+            blockedModules.Add(new Rectangle(0, 25 - 8, 8, 1)); // Horizontal block near the bottom left finder pattern
+            blockedModules.Add(new Rectangle(7, 25 - 7, 1, 7)); // Vertical block near the bottom left finder pattern
 
             // Block areas around the top-right finder pattern
-            blockedModules.Add(new Rectangle(size - 8, 0, 1, 8)); // Vertical block near the top right finder pattern
-            blockedModules.Add(new Rectangle(size - 7, 7, 7, 1)); // Horizontal block near the top right finder pattern
+            blockedModules.Add(new Rectangle(25 - 8, 0, 1, 8)); // Vertical block near the top right finder pattern
+            blockedModules.Add(new Rectangle(25 - 7, 7, 7, 1)); // Horizontal block near the top right finder pattern
 
         }
 
         /// <summary>
         /// Reserves areas for version information on QR codes that are version 7 or higher. Also reserves space for format information.
         /// </summary>
-        /// <param name="size">The size of the QR code matrix.</param>
-        /// <param name="version">The version number of the QR code, which determines the placement of version information.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten.</param>
-        public static void ReserveVersionAreas(int size, BlockedModules blockedModules)
+        public static void ReserveVersionAreas(BlockedModules blockedModules)
         {
             // Reserve areas near the timing patterns for version and format information.
             blockedModules.Add(new Rectangle(8, 0, 1, 6));        // Near the top timing pattern
             blockedModules.Add(new Rectangle(8, 7, 1, 1));        // Small square near the top left finder pattern
             blockedModules.Add(new Rectangle(0, 8, 6, 1));        // Near the left timing pattern
             blockedModules.Add(new Rectangle(7, 8, 2, 1));        // Extension of the above block
-            blockedModules.Add(new Rectangle(size - 8, 8, 8, 1)); // Near the right timing pattern
-            blockedModules.Add(new Rectangle(8, size - 7, 1, 7)); // Near the bottom timing pattern
+            blockedModules.Add(new Rectangle(25 - 8, 8, 8, 1)); // Near the right timing pattern
+            blockedModules.Add(new Rectangle(8, 25 - 7, 1, 7)); // Near the bottom timing pattern
         }
 
         /// <summary>
         /// Places a dark module on the QR code matrix as per QR code specification, which requires a dark module at a specific position for all QR codes.
         /// </summary>
         /// <param name="qrCode">The QR code data structure where the dark module is to be placed.</param>
-        /// <param name="version">The version number of the QR code, which determines the specific location of the dark module.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten, updated to include the dark module.</param>
-        public static void PlaceDarkModule(QRCodeData qrCode, int version, BlockedModules blockedModules)
+        public static void PlaceDarkModule(QRCodeData qrCode, BlockedModules blockedModules)
         {
             // Place the dark module, which is always required to be black.
-            qrCode.ModuleMatrix[(4 * version) + 9][8] = true;
+            qrCode.ModuleMatrix[(4 * 2) + 9][8] = true;
 
             // Block the dark module area to prevent overwriting during further QR code generation steps.
-            blockedModules.Add(new Rectangle(8, (4 * version) + 9, 1, 1));
+            blockedModules.Add(new Rectangle(8, (4 * 2) + 9, 1, 1));
         }
 
         /// <summary>
@@ -298,7 +254,6 @@ public partial class QRCodeGenerator
         /// Places alignment patterns on the QR code matrix. Alignment patterns help ensure the scanner can correctly interpret the QR code at various scales and orientations.
         /// </summary>
         /// <param name="qrCode">The QR code data structure where the alignment patterns will be placed.</param>
-        /// <param name="alignmentPatternLocations">A list of points representing the centers of where alignment patterns should be placed.</param>
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten. Updated with the areas occupied by alignment patterns.</param>
         public static void PlaceAlignmentPatterns(QRCodeData qrCode, BlockedModules blockedModules)
         {
@@ -327,11 +282,8 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten. Updated with the areas occupied by timing patterns.</param>
         public static void PlaceTimingPatterns(QRCodeData qrCode, BlockedModules blockedModules)
         {
-            // Get the size of the QR code matrix excluding padding.
-            var size = qrCode.ModuleMatrix.Count;// - 8;
-
             // Place timing patterns starting from the 8th module to the size - 8 to avoid overlapping with finder patterns.
-            for (var i = 8; i < size - 8; i++)
+            for (var i = 8; i < 25 - 8; i++)
             {
                 if (i % 2 == 0) // Place a dark module every other module to create the alternating pattern.
                 {
@@ -341,8 +293,8 @@ public partial class QRCodeGenerator
             }
 
             // Add the areas occupied by the timing patterns to the list of blocked modules.
-            blockedModules.Add(new Rectangle(6, 8, 1, size - 16)); // Horizontal timing pattern area
-            blockedModules.Add(new Rectangle(8, 6, size - 16, 1)); // Vertical timing pattern area
+            blockedModules.Add(new Rectangle(6, 8, 1, 25 - 16)); // Horizontal timing pattern area
+            blockedModules.Add(new Rectangle(8, 6, 25 - 16, 1)); // Vertical timing pattern area
         }
     }
 }
