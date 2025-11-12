@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -14,7 +12,7 @@ public partial class QRCodeGenerator
     /// <param name="codeWordsOffset">The offset of the data codewords within the main BitArray. Data codewords carry the actual information.</param>
     /// <param name="codeWordsLength">The length in bits of the data codewords within the main BitArray.</param>
     /// <param name="eccWords">The array of error correction codewords for this block. These codewords help recover the data if the QR code is damaged.</param>
-    private readonly struct CodewordBlock(int codeWordsOffset, int codeWordsLength, ArraySegment<byte> eccWords)
+    private readonly struct CodewordBlock(int codeWordsOffset, int codeWordsLength, byte[] eccWords)
     {
 
         /// <summary>
@@ -30,7 +28,7 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Gets the error correction codewords associated with this block.
         /// </summary>
-        public ArraySegment<byte> ECCWords { get; } = eccWords;
+        public byte[] ECCWords { get; } = eccWords;
 
         private static List<CodewordBlock>? codewordBlocks;
 
@@ -39,11 +37,6 @@ public partial class QRCodeGenerator
 
         public static void ReturnList(List<CodewordBlock> list)
         {
-            foreach (CodewordBlock item in list)
-            {
-                ArrayPool<byte>.Shared.Return(item.ECCWords.Array!);
-            }
-
             list.Clear();
             _ = Interlocked.CompareExchange(ref codewordBlocks, list, null);
         }

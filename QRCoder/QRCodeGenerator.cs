@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Collections;
+﻿using System.Collections;
 using System.Runtime.CompilerServices;
 
 namespace QRCoder;
@@ -123,7 +122,7 @@ public static partial class QRCodeGenerator
                 groupLength = groupLength > count ? count : groupLength;
                 for (var i = 0; i < blocksInGroup; i++)
                 {
-                    ArraySegment<byte> eccWordList = CalculateECCWords(bitArray, offset2, groupLength, generatorPolynom);
+                    var eccWordList = CalculateECCWords(bitArray, offset2, groupLength, generatorPolynom);
                     codewordBlocks.Add(new CodewordBlock(offset2, groupLength, eccWordList));
                     offset2 += groupLength;
                 }
@@ -151,7 +150,7 @@ public static partial class QRCodeGenerator
             {
                 foreach (CodewordBlock codeBlock in codeWordWithECC)
                 {
-                    if (codeBlock.ECCWords.Count > i)
+                    if (codeBlock.ECCWords.Length > i)
                     {
                         length += 8;
                     }
@@ -188,9 +187,9 @@ public static partial class QRCodeGenerator
             {
                 foreach (CodewordBlock codeBlock in codeWordWithECC)
                 {
-                    if (codeBlock.ECCWords.Count > i)
+                    if (codeBlock.ECCWords.Length > i)
                     {
-                        pos = DecToBin(codeBlock.ECCWords.Array![i], 8, data, pos);
+                        pos = DecToBin(codeBlock.ECCWords[i], 8, data, pos);
                     }
                 }
             }
@@ -291,7 +290,7 @@ public static partial class QRCodeGenerator
     /// This method applies polynomial division, using the message polynomial and a generator polynomial,
     /// to compute the remainder which forms the ECC codewords.
     /// </summary>
-    private static ArraySegment<byte> CalculateECCWords(BitArray bitArray, int offset, int count, Polynom generatorPolynomBase)
+    private static byte[] CalculateECCWords(BitArray bitArray, int offset, int count, Polynom generatorPolynomBase)
     {
         var eccWords = 16;
 
@@ -348,8 +347,7 @@ public static partial class QRCodeGenerator
         generatorPolynom.Dispose();
 
         // Convert the resulting polynomial into a byte array representing the ECC codewords.
-        var array = ArrayPool<byte>.Shared.Rent(leadTermSource.Count);
-        var ret = new ArraySegment<byte>(array, 0, leadTermSource.Count);
+        var array = new byte[leadTermSource.Count];
 
         for (var i = 0; i < leadTermSource.Count; i++)
         {
@@ -359,7 +357,7 @@ public static partial class QRCodeGenerator
         // Free memory used by the message polynomial.
         leadTermSource.Dispose();
 
-        return ret;
+        return array;
     }
 
     /// <summary>
