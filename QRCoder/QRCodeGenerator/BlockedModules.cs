@@ -49,27 +49,6 @@ public partial class QRCodeGenerator
             /// <returns><c>true</c> if the coordinates are blocked; otherwise, <c>false</c>.</returns>
             public readonly bool IsBlocked(int x, int y)
                 => blockedModules[y][x];
-
-            /// <summary>
-            /// Checks if the specified rectangle is blocked.
-            /// </summary>
-            /// <param name="r1">The rectangle to check.</param>
-            /// <returns><c>true</c> if the rectangle is blocked; otherwise, <c>false</c>.</returns>
-            public readonly bool IsBlocked(Rectangle r1)
-            {
-                for (var y = r1.Y; y < r1.Y + r1.Height; y++)
-                {
-                    for (var x = r1.X; x < r1.X + r1.Width; x++)
-                    {
-                        if (blockedModules[y][x])
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
         }
     }
 }
