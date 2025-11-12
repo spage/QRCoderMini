@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace QRCoder;
+﻿namespace QRCoder;
 
 public partial class QRCodeGenerator
 {
@@ -12,7 +10,7 @@ public partial class QRCodeGenerator
     /// </remarks>
     /// <param name="x">The X-coordinate of the point.</param>
     /// <param name="y">The Y-coordinate of the point.</param>
-    private readonly struct Point(int x, int y) : IEquatable<Point>
+    private readonly struct Point(int x, int y)
     {
         /// <summary>
         /// Gets the X-coordinate of the point.
@@ -23,24 +21,5 @@ public partial class QRCodeGenerator
         /// Gets the Y-coordinate of the point.
         /// </summary>
         public int Y { get; } = y;
-
-        /// <summary>
-        /// Determines whether the specified <see cref="Point"/> is equal to the current <see cref="Point"/>.
-        /// </summary>
-        /// <param name="other">The <see cref="Point"/> to compare with the current <see cref="Point"/>.</param>
-        /// <returns>True if the specified <see cref="Point"/> has the same X and Y coordinates as the current <see cref="Point"/>; otherwise, false.</returns>
-        /// <remarks>
-        /// If this method which implements <see cref="IEquatable{T}.Equals(T)"/> is not implemented, comparisons used by methods such as <see cref="List{T}.Contains(T)"/>
-        /// fall back to reflection, which causes heap allocations internally during the calls to <see cref="FieldInfo.GetValue(object)"/>.
-        /// </remarks>
-        public bool Equals(Point other)
-            => X == other.X && Y == other.Y;
-
-        /// <inheritdoc/>
-        public override bool Equals(object? obj) => obj is Point point && Equals(point);
-
-        /// <inheritdoc/>
-        public override int GetHashCode()
-            => HashCode.Combine(X, Y);
     }
 }

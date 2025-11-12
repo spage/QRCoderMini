@@ -9,7 +9,7 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Struct that represents blocked modules using rectangles.
         /// </summary>
-        public struct BlockedModules
+        public readonly struct BlockedModules
         {
             private readonly BitArray[] blockedModules;
 
