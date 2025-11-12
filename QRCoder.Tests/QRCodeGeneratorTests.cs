@@ -17,20 +17,12 @@ public class QRCodeGeneratorTests
     [Fact]
     public void CreateQrCode_WithTrkidUrl_Version2_EccLevelM_ReturnsQRCodeData()
     {
-        // Arrange
+        // test call and expected result
         var plainText = "HTTPS://TRKID.COM/Z/PPPPSSSSSSSSNNNNXX";
-        //QRCodeGenerator.ECCLevel eccLevel = QRCodeGenerator.ECCLevel.M;
-        //var requestedVersion = 2;
         var qrcode_hex = "FE0EBFC15ED06E938BB74735DBAA32EC12A507FAAAFE004C00AA728908B324D8A057E512933F62F2A340A84EBD5800BA43E8BBF2FC8076C57F906BB043B15BAC9FEDD3E842EB3CFB0428ABFEDE3C80";
-        // Act
-        QRCodeData qrCodeData = QRCodeGenerator.GenerateQrCode(plainText); //, eccLevel, requestedVersion: requestedVersion);
 
-        // Assert
-        Assert.NotNull(qrCodeData);
-        Assert.Equal(2, qrCodeData.Version);
 
-        var dataBytes = qrCodeData.GetRawData();
-        var hexString = Convert.ToHexString(dataBytes);
+        var hexString = QRCodeGenerator.GenerateTrkidQrCode(plainText);
 
         // some bad test behavior, writing files out for inspection
         var outputPath = Path.Combine(OutputDirectory, "qrcode_hex.txt");
@@ -42,23 +34,15 @@ public class QRCodeGeneratorTests
     [Fact]
     public void CreateQrCode_WithTrkidUrl_Version2_EccLevelM_ReturnsExpectedHexString()
     {
+        //builds an SVG of the qrcode to output directory for visual inspection
         var plainText = "HTTPS://TRKID.COM/Z/PPPPSSSSSSSSNNNNXX";
-        //QRCodeGenerator.ECCLevel eccLevel = QRCodeGenerator.ECCLevel.M;
-        //var requestedVersion = 2;
+        var qrcode_hex = "FE0EBFC15ED06E938BB74735DBAA32EC12A507FAAAFE004C00AA728908B324D8A057E512933F62F2A340A84EBD5800BA43E8BBF2FC8076C57F906BB043B15BAC9FEDD3E842EB3CFB0428ABFEDE3C80";
 
-        // Act
-        QRCodeData qrCodeData = QRCodeGenerator.GenerateQrCode(plainText); //, eccLevel, requestedVersion: requestedVersion);
 
-        // Assert
-        Assert.NotNull(qrCodeData);
-        Assert.Equal(2, qrCodeData.Version);
+        var hexString = QRCodeGenerator.GenerateTrkidQrCode(plainText);
+        Assert.Equal(qrcode_hex, hexString);
 
-        var dataBytes = qrCodeData.GetRawData();
-        var qrhex = Convert.ToHexString(dataBytes);
-
-        // Arrange
-        //var qrhex = "FE0EBFC15ED06E938BB74735DBAA32EC12A507FAAAFE004C00AA728908B324D8A057E512933F62F2A340A84EBD5800BA43E8BBF2FC8076C57F906BB043B15BAC9FEDD3E842EB3CFB0428ABFEDE3C80";
-        var cr = new CodeReader(qrhex);
+        var cr = new CodeReader(hexString);
 
         const int ModuleSize = 20;
         const int SafeZone = 2;

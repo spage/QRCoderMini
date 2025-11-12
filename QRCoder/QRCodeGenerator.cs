@@ -7,6 +7,20 @@ namespace QRCoder;
 /// </summary>
 public static partial class QRCodeGenerator
 {
+    ///<summary>
+    /// Generates a TRKID QR code from the given plain text.
+    /// </summary>
+    /// <param name="plainText">The payload which shall be encoded in the QR code.</param>
+    /// <returns>A hexadecimal representation of the generated TRKID QR code bytes.</returns>
+    public static string GenerateTrkidQrCode(string plainText)
+    {
+        // Generate the QR code data
+        QRCodeData qrCodeData = GenerateQrCode(plainText);
+
+        // Convert the QR code data to a hexadecimal string
+        return Convert.ToHexString(qrCodeData.GetRawData());
+    }
+
     /// <summary>
     /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
     /// </summary>
@@ -17,7 +31,7 @@ public static partial class QRCodeGenerator
     /// <param name="eciMode">Which ECI mode shall be used?.</param>
     /// <param name="requestedVersion">Set fixed QR code target version.</param>
     /// <returns>Returns the raw QR code data which can be used for rendering.</returns>
-    public static QRCodeData GenerateQrCode(string plainText)
+    private static QRCodeData GenerateQrCode(string plainText)
     {
         // Create data segment from plain text
         var segment = new AlphanumericDataSegment(plainText);
