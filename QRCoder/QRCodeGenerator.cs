@@ -56,8 +56,6 @@ public static partial class QRCodeGenerator
         // Place interleaved data on module matrix
         QRCodeData qrData = PlaceModules();
 
-        CodewordBlock.ReturnList(codeWordWithECC);
-
         return qrData;
 
         // fills the bit array with a repeating pattern to reach the required length
@@ -106,7 +104,7 @@ public static partial class QRCodeGenerator
             Polynom generatorPolynom = CalculateGeneratorPolynom(16);
 
             // Calculate error correction words
-            List<CodewordBlock> codewordBlocks = CodewordBlock.GetList(1);
+            List<CodewordBlock> codewordBlocks = new(2);
             AddCodeWordBlocks(1, 1, 28, 0, bitArray.Length, generatorPolynom);
             var offset = 1 * 28 * 8;
             AddCodeWordBlocks(2, 1, 28, offset, bitArray.Length - offset, generatorPolynom);

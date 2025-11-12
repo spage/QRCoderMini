@@ -29,16 +29,5 @@ public partial class QRCodeGenerator
         /// Gets the error correction codewords associated with this block.
         /// </summary>
         public byte[] ECCWords { get; } = eccWords;
-
-        private static List<CodewordBlock>? codewordBlocks;
-
-        public static List<CodewordBlock> GetList(int capacity)
-            => Interlocked.Exchange(ref codewordBlocks, null) ?? new List<CodewordBlock>(capacity);
-
-        public static void ReturnList(List<CodewordBlock> list)
-        {
-            list.Clear();
-            _ = Interlocked.CompareExchange(ref codewordBlocks, list, null);
-        }
     }
 }

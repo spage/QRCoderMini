@@ -5,7 +5,7 @@ namespace QRCoder;
 /// <summary>
 /// Represents the data structure of a QR code.
 /// </summary>
-public class QRCodeData : IDisposable
+public class QRCodeData
 {
     /// <summary>
     /// Gets or sets the module matrix of the QR code.
@@ -73,14 +73,4 @@ public class QRCodeData : IDisposable
     /// Gets the version of the QR code.
     /// </summary>
     public int Version { get; private set; }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="QRCodeData"/>.
-    /// </summary>
-    public virtual void Dispose()
-    {
-        ModuleMatrix = null!;
-        Version = 0;
-        GC.SuppressFinalize(this);
-    }
 }
