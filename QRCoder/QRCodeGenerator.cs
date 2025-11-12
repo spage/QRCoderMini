@@ -29,11 +29,12 @@ public static partial class QRCodeGenerator
 
     /// <summary>
     /// Validates that the plain text conforms to the TRKID format specification.
-    /// Format: HTTPS://TRKID.COM/C/XXXXXXXXXXXX######AA
+    /// Format: HTTPS://TRKID.COM/C/PPPPSSSSSSSS####AA
     /// - Positions 0-17 (18 chars): "HTTPS://TRKID.COM/"
-    /// - Position 18 (1 char): Single alphanumeric character
+    /// - Position 18 (1 char): Single Alphanumeric character
     /// - Position 19 (1 char): "/"
-    /// - Positions 20-31 (12 chars): Alphanumeric characters
+    /// - Positions 20-23 (4 chars): Alphanumeric characters
+    /// - Positions 24-31 (8 chars): Hexadecimal characters
     /// - Positions 32-35 (4 chars): Decimal digits (0-9)
     /// - Positions 36-37 (2 chars): Alphanumeric characters
     /// Total: 40 characters
@@ -54,8 +55,8 @@ public static partial class QRCodeGenerator
             return false;
         }
 
-        // Position 18: Single character that must be alphanumeric
-        if (!AlphanumericEncoder.CanEncode(plainText[18]))
+        // Position 18: Single character that must be uppercase letter or digit
+        if (!IsUppercaseAlphaOrDigit(plainText[18]))
         {
             return false;
         }
@@ -66,10 +67,19 @@ public static partial class QRCodeGenerator
             return false;
         }
 
-        // Positions 20-31: 12 characters that must be alphanumeric
-        for (var i = 20; i < 32; i++)
+        // Positions 20-23: 4 characters that must be uppercase letter or digit
+        for (var i = 20; i < 24; i++)
         {
-            if (!AlphanumericEncoder.CanEncode(plainText[i]))
+            if (!IsUppercaseAlphaOrDigit(plainText[i]))
+            {
+                return false;
+            }
+        }
+
+        // Positions 24-31: 8 characters that must be hexadecimal digits
+        for (var i = 24; i < 32; i++)
+        {
+            if (!IsHexadecimalDigit(plainText[i]))
             {
                 return false;
             }
@@ -84,17 +94,28 @@ public static partial class QRCodeGenerator
             }
         }
 
-        // Positions 36-37: 2 characters that must be alphanumeric
+        // Positions 36-37: 2 characters that must be uppercase letter or digit
         for (var i = 36; i < 38; i++)
         {
-            if (!AlphanumericEncoder.CanEncode(plainText[i]))
+            if (!IsUppercaseAlphaOrDigit(plainText[i]))
             {
                 return false;
             }
         }
 
         return true;
+
+        static bool IsUppercaseAlphaOrDigit(char c)
+        {
+            return c is (>= 'A' and <= 'Z') or (>= '0' and <= '9');
+        }
+
+        static bool IsHexadecimalDigit(char c)
+        {
+            return c is (>= 'A' and <= 'F') or (>= '0' and <= '9');
+        }
     }
+
 
     /// <summary>
     /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.

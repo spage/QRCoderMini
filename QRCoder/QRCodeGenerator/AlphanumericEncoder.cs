@@ -119,13 +119,6 @@ public partial class QRCodeGenerator
         ];
 
         /// <summary>
-        /// Checks if a character is present in the alphanumeric encoding table.
-        /// </summary>
-        /// <returns></returns>
-        // NOTE: not currently used, but can be useful for validation
-        public static bool CanEncode(char c) => c <= 90 && Map[c] != 255;
-
-        /// <summary>
         /// Calculates the bit length required to encode alphanumeric text of a given length.
         /// </summary>
         /// <param name="textLength">The length of the alphanumeric text to be encoded.</param>
