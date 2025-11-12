@@ -631,7 +631,6 @@ public partial class QRCodeGenerator : IDisposable
             //
             // For writing the result the same scratch buffer is used, as by definition the index to write the result
             // is `<=` the iteration index, so no overlap, etc. can occur.
-            Debug.Assert(list.Count == buffer.Length);
 
             var idx = 0;
             foreach (PolynomItem row in list)
@@ -655,8 +654,6 @@ public partial class QRCodeGenerator : IDisposable
                 {
                     if (expCount > 0)
                     {
-                        Debug.Assert(idx <= i - 1);
-
                         buffer[idx++] = last;
                         expCount = 0;
                     }

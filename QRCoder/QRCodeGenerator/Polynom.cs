@@ -6,18 +6,18 @@ public partial class QRCodeGenerator
     /// Represents a polynomial, which is a sum of polynomial terms.
     /// </summary>
     /// <remarks>
-    /// Initializes a new instance of the <see cref="Polynom"/> struct with a specified number of initial capacity for polynomial terms.
+    /// Uses a pooled array internally. This type is a class to ensure a single owner of the pooled array
+    /// and to avoid the risk of accidental copies that occur with structs.
     /// </remarks>
-    /// <param name="count">The initial capacity of the polynomial items list.</param>
-    private struct Polynom(int count) : IDisposable
+    private sealed class Polynom(int count) : IDisposable
     {
-        private PolynomItem[] polyItems = RentArray(count);
+        private PolynomItem[]? polyItems = RentArray(count);
+        private bool disposed;
 
         /// <summary>
         /// Adds a polynomial term to the polynomial.
         /// </summary>
-        public void Add(PolynomItem item) =>
-            polyItems[Count++] = item;
+        public void Add(PolynomItem item) => polyItems![Count++] = item;
 
         /// <summary>
         /// Removes the polynomial term at the specified index.
@@ -26,7 +26,7 @@ public partial class QRCodeGenerator
         {
             if (index < Count - 1)
             {
-                Array.Copy(polyItems, index + 1, polyItems, index, Count - index - 1);
+                Array.Copy(polyItems!, index + 1, polyItems!, index, Count - index - 1);
             }
 
             Count--;
@@ -35,17 +35,16 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Gets or sets a polynomial term at the specified index.
         /// </summary>
-        public readonly PolynomItem this[int index]
+        public PolynomItem this[int index]
         {
-            get => polyItems[index];
-
-            set => polyItems[index] = value;
+            get => polyItems![index];
+            set => polyItems![index] = value;
         }
 
         /// <summary>
         /// Gets the number of polynomial terms in the polynomial.
         /// </summary>
-        public int Count { get; private set; } = 0;
+        public int Count { get; private set; }
 
         /// <summary>
         /// Removes all polynomial terms from the polynomial.
@@ -55,10 +54,10 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Clones the polynomial, creating a new instance with the same polynomial terms.
         /// </summary>
-        public readonly Polynom Clone()
+        public Polynom Clone()
         {
             var newPolynom = new Polynom(Count);
-            Array.Copy(polyItems, newPolynom.polyItems, Count);
+            Array.Copy(polyItems!, newPolynom.polyItems!, Count);
             newPolynom.Count = Count;
             return newPolynom;
         }
@@ -66,17 +65,12 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Sorts the collection of <see cref="PolynomItem"/> using a custom comparer function.
         /// </summary>
-        /// <param name="comparer">
-        /// A function that compares two <see cref="PolynomItem"/> objects and returns an integer indicating their relative order:
-        /// less than zero if the first is less than the second, zero if they are equal, or greater than zero if the first is greater than the second.
-        /// </param>
-        public readonly void Sort(Func<PolynomItem, PolynomItem, int> comparer)
+        public void Sort(Func<PolynomItem, PolynomItem, int> comparer)
         {
-            PolynomItem[] items = polyItems;
-
+            PolynomItem[] items = polyItems!;
             if (Count <= 1)
             {
-                return; // Nothing to sort if the list is empty or contains only one element
+                return;
             }
 
             void QuickSort(int left, int right)
@@ -99,14 +93,12 @@ public partial class QRCodeGenerator
 
                     if (i <= j)
                     {
-                        // Swap items[i] and items[j]
                         (items[j], items[i]) = (items[i], items[j]);
                         i++;
                         j--;
                     }
                 }
 
-                // Recursively sort the sub-arrays
                 if (left < j)
                 {
                     QuickSort(left, j);
@@ -124,34 +116,47 @@ public partial class QRCodeGenerator
         /// <inheritdoc/>
         public void Dispose()
         {
-            ReturnArray(polyItems);
-            polyItems = null!;
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
+            if (polyItems is not null)
+            {
+                // If PolynomItem holds managed references and you worry about retention/leaks,
+                // consider returning the array with clearArray: true:
+                // System.Buffers.ArrayPool<PolynomItem>.Shared.Return(polyItems, clearArray: true);
+                ReturnArray(polyItems);
+                polyItems = null;
+            }
         }
 
-        /// <summary>
-        /// Rents memory for the polynomial terms from the shared memory pool.
-        /// </summary>
         private static PolynomItem[] RentArray(int count)
             => System.Buffers.ArrayPool<PolynomItem>.Shared.Rent(count);
 
-        /// <summary>
-        /// Returns memory allocated for the polynomial terms back to the shared memory pool.
-        /// </summary>
         private static void ReturnArray(PolynomItem[] array)
             => System.Buffers.ArrayPool<PolynomItem>.Shared.Return(array);
 
         /// <summary>
         /// Returns an enumerator that iterates through the polynomial terms.
         /// </summary>
-        public readonly PolynumEnumerator GetEnumerator() => new(this);
+        public PolynumEnumerator GetEnumerator() => new(this);
 
         /// <summary>
-        /// Value type enumerator for the <see cref="Polynom"/> struct.
+        /// Value type enumerator for the <see cref="Polynom"/> class.
         /// </summary>
-        public struct PolynumEnumerator(Polynom polynom)
+        public struct PolynumEnumerator
         {
-            private Polynom polynom = polynom;
-            private int index = -1;
+            private readonly Polynom polynom;
+            private int index;
+
+            internal PolynumEnumerator(Polynom polynom)
+            {
+                this.polynom = polynom;
+                index = -1;
+            }
 
             public readonly PolynomItem Current => polynom[index];
 
