@@ -208,10 +208,10 @@ public partial class QRCodeGenerator
         public static void PlaceDarkModule(QRCodeData qrCode, BlockedModules blockedModules)
         {
             // Place the dark module, which is always required to be black.
-            qrCode.ModuleMatrix[(4 * 2) + 9][8] = true;
+            qrCode.ModuleMatrix[17][8] = true;
 
             // Block the dark module area to prevent overwriting during further QR code generation steps.
-            blockedModules.Add(new Rectangle(8, (4 * 2) + 9, 1, 1));
+            blockedModules.Add(new Rectangle(8, 17, 1, 1));
         }
 
         /// <summary>
@@ -221,15 +221,12 @@ public partial class QRCodeGenerator
         /// <param name="blockedModules">A list of rectangles representing areas that must not be overwritten. This is updated with the areas occupied by the finder patterns.</param>
         public static void PlaceFinderPatterns(QRCodeData qrCode, BlockedModules blockedModules)
         {
-            var size = qrCode.ModuleMatrix.Count; // NO BORDER - 8;
-
             // Loop to place three finder patterns in the top-left, top-right, and bottom-left corners of the QR code.
-            var count = 3;
-            for (var i = 0; i < count; i++)
+            for (var i = 0; i < 3; i++)
             {
                 // Calculate the x and y starting positions for each finder pattern based on the index.
-                var locationX = i == 1 ? size - 7 : 0; // Place at top-right if i is 1, otherwise at left side (top or bottom).
-                var locationY = i == 2 ? size - 7 : 0; // Place at bottom-left if i is 2, otherwise at top (left or right).
+                var locationX = i == 1 ? 25 - 7 : 0; // Place at top-right if i is 1, otherwise at left side (top or bottom).
+                var locationY = i == 2 ? 25 - 7 : 0; // Place at bottom-left if i is 2, otherwise at top (left or right).
 
                 // Nested loops to draw the 7x7 finder pattern at the calculated location.
                 for (var x = 0; x < 7; x++)
@@ -293,8 +290,8 @@ public partial class QRCodeGenerator
             }
 
             // Add the areas occupied by the timing patterns to the list of blocked modules.
-            blockedModules.Add(new Rectangle(6, 8, 1, 25 - 16)); // Horizontal timing pattern area
-            blockedModules.Add(new Rectangle(8, 6, 25 - 16, 1)); // Vertical timing pattern area
+            blockedModules.Add(new Rectangle(6, 8, 1, 9)); // Horizontal timing pattern area
+            blockedModules.Add(new Rectangle(8, 6, 9, 1)); // Vertical timing pattern area
         }
     }
 }
