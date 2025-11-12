@@ -102,18 +102,15 @@ public static partial class QRCodeGenerator
         List<CodewordBlock> CalculateECCBlocks()
         {
             // Version 2, ECC Level M: 1 block, 28 data codewords, 16 ECC codewords
-            List<CodewordBlock> codewordBlocks;
-
             // Generate the generator polynomial using 16 ECC words (hardcoded for Version 2, ECC Level M)
-            using (Polynom generatorPolynom = CalculateGeneratorPolynom(16))
-            {
-                // Calculate error correction words
-                codewordBlocks = CodewordBlock.GetList(1);
-                AddCodeWordBlocks(1, 1, 28, 0, bitArray.Length, generatorPolynom);
-                var offset = 1 * 28 * 8;
-                AddCodeWordBlocks(2, 1, 28, offset, bitArray.Length - offset, generatorPolynom);
-                return codewordBlocks;
-            }
+            Polynom generatorPolynom = CalculateGeneratorPolynom(16);
+
+            // Calculate error correction words
+            List<CodewordBlock> codewordBlocks = CodewordBlock.GetList(1);
+            AddCodeWordBlocks(1, 1, 28, 0, bitArray.Length, generatorPolynom);
+            var offset = 1 * 28 * 8;
+            AddCodeWordBlocks(2, 1, 28, offset, bitArray.Length - offset, generatorPolynom);
+            return codewordBlocks;
 
             void AddCodeWordBlocks(int blockNum, int blocksInGroup, int codewordsInGroup, int offset2, int count, Polynom generatorPolynom)
             {
@@ -334,17 +331,10 @@ public static partial class QRCodeGenerator
                 ConvertToDecNotationInPlace(resPoly);
                 Polynom newPoly = XORPolynoms(leadTermSource, resPoly);
 
-                // Free memory used by the previous polynomials.
-                resPoly.Dispose();
-                leadTermSource.Dispose();
-
                 // Update the message polynomial with the new remainder.
                 leadTermSource = newPoly;
             }
         }
-
-        // Free memory used by the generator polynomial.
-        generatorPolynom.Dispose();
 
         // Convert the resulting polynomial into a byte array representing the ECC codewords.
         var array = new byte[leadTermSource.Count];
@@ -353,9 +343,6 @@ public static partial class QRCodeGenerator
         {
             array[i] = (byte)leadTermSource[i].Coefficient;
         }
-
-        // Free memory used by the message polynomial.
-        leadTermSource.Dispose();
 
         return array;
     }
@@ -438,20 +425,18 @@ public static partial class QRCodeGenerator
         generatorPolynom.Add(new PolynomItem(0, 1));
         generatorPolynom.Add(new PolynomItem(0, 0));
 
-        using (var multiplierPolynom = new Polynom(numEccWords * 2)) // Used for polynomial multiplication
-        {
-            for (var i = 1; i <= numEccWords - 1; i++)
-            {
-                // Clear and set up the multiplier polynomial for the current multiplication
-                multiplierPolynom.Clear();
-                multiplierPolynom.Add(new PolynomItem(0, 1));
-                multiplierPolynom.Add(new PolynomItem(i, 0));
+        var multiplierPolynom = new Polynom(numEccWords * 2); // Used for polynomial multiplication
 
-                // Multiply the generator polynomial by the current multiplier polynomial
-                Polynom newGeneratorPolynom = MultiplyAlphaPolynoms(generatorPolynom, multiplierPolynom);
-                generatorPolynom.Dispose();
-                generatorPolynom = newGeneratorPolynom;
-            }
+        for (var i = 1; i <= numEccWords - 1; i++)
+        {
+            // Clear and set up the multiplier polynomial for the current multiplication
+            multiplierPolynom.Clear();
+            multiplierPolynom.Add(new PolynomItem(0, 1));
+            multiplierPolynom.Add(new PolynomItem(i, 0));
+
+            // Multiply the generator polynomial by the current multiplier polynomial
+            Polynom newGeneratorPolynom = MultiplyAlphaPolynoms(generatorPolynom, multiplierPolynom);
+            generatorPolynom = newGeneratorPolynom;
         }
 
         return generatorPolynom; // Return the completed generator polynomial
