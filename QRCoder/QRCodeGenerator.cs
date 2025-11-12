@@ -14,11 +14,86 @@ public static partial class QRCodeGenerator
     /// <returns>A hexadecimal representation of the generated TRKID QR code bytes.</returns>
     public static string GenerateTrkidQrCode(string plainText)
     {
+        // Validate the plain text format
+        if (!ValidateTrkidFormat(plainText))
+        {
+            return string.Empty;
+        }
+
         // Generate the QR code data
         QRCodeData qrCodeData = GenerateQrCode(plainText);
 
         // Convert the QR code data to a hexadecimal string
         return Convert.ToHexString(qrCodeData.GetRawData());
+    }
+
+    /// <summary>
+    /// Validates that the plain text conforms to the TRKID format specification.
+    /// Format: HTTPS://TRKID.COM/C/XXXXXXXXXXXX######AA
+    /// - Positions 0-17 (18 chars): "HTTPS://TRKID.COM/"
+    /// - Position 18 (1 char): Single alphanumeric character
+    /// - Position 19 (1 char): "/"
+    /// - Positions 20-31 (12 chars): Alphanumeric characters
+    /// - Positions 32-35 (4 chars): Decimal digits (0-9)
+    /// - Positions 36-37 (2 chars): Alphanumeric characters
+    /// Total: 40 characters
+    /// </summary>
+    /// <param name="plainText">The text to validate.</param>
+    /// <returns>True if the text matches the expected TRKID format; otherwise, false.</returns>
+    private static bool ValidateTrkidFormat(string plainText)
+    {
+        // Must be exactly 38 characters (18 + 1 + 1 + 12 + 4 + 2)
+        if (plainText == null || plainText.Length != 38)
+        {
+            return false;
+        }
+
+        // Must start with "HTTPS://TRKID.COM/"
+        if (!plainText.StartsWith("HTTPS://TRKID.COM/", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // Position 18: Single character that must be alphanumeric
+        if (!AlphanumericEncoder.CanEncode(plainText[18]))
+        {
+            return false;
+        }
+
+        // Position 19: Must be "/"
+        if (plainText[19] != '/')
+        {
+            return false;
+        }
+
+        // Positions 20-31: 12 characters that must be alphanumeric
+        for (var i = 20; i < 32; i++)
+        {
+            if (!AlphanumericEncoder.CanEncode(plainText[i]))
+            {
+                return false;
+            }
+        }
+
+        // Positions 32-35: 4 decimal digits
+        for (var i = 32; i < 36; i++)
+        {
+            if (plainText[i] is < '0' or > '9')
+            {
+                return false;
+            }
+        }
+
+        // Positions 36-37: 2 characters that must be alphanumeric
+        for (var i = 36; i < 38; i++)
+        {
+            if (!AlphanumericEncoder.CanEncode(plainText[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
