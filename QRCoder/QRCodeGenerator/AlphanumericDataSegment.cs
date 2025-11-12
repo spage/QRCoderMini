@@ -7,14 +7,30 @@ public partial class QRCodeGenerator
     /// <summary>
     /// Data segment optimized for alphanumeric data encoding.
     /// </summary>
-    private sealed class AlphanumericDataSegment(string alphanumericText) : DataSegment(alphanumericText)
+    private sealed class AlphanumericDataSegment(string alphanumericText)
     {
+        /// <summary>
+        /// Gets the text to encode.
+        /// </summary>
+        public string Text { get; } = alphanumericText;
+
+        /// <summary>
+        /// Builds a complete BitArray from this data segment.
+        /// </summary>
+        /// <returns>A BitArray containing the complete encoded segment.</returns>
+        public BitArray ToBitArray()
+        {
+            var bitArray = new BitArray(GetBitLength());
+            _ = WriteTo(bitArray, 0);
+            return bitArray;
+        }
+
         /// <summary>
         /// Calculates the total bit length for this segment when encoded for a specific QR code version.
         /// </summary>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The total number of bits required for this segment.</returns>
-        public override int GetBitLength() => GetBitLength(Text.Length);
+        public int GetBitLength() => GetBitLength(Text.Length);
 
         /// <summary>
         /// Calculates the total bit length for encoding alphanumeric text of a given length for a specific QR code version.
@@ -40,7 +56,7 @@ public partial class QRCodeGenerator
         /// <param name="startIndex">The starting index in the BitArray.</param>
         /// <param name="version">The QR code version (1-40, or -1 to -4 for Micro QR).</param>
         /// <returns>The next index in the BitArray after the last bit written.</returns>
-        public override int WriteTo(BitArray bitArray, int startIndex) => WriteTo(Text, 0, Text.Length, bitArray, startIndex);
+        public int WriteTo(BitArray bitArray, int startIndex) => WriteTo(Text, 0, Text.Length, bitArray, startIndex);
 
         /// <summary>
         /// Writes a portion of alphanumeric text to a BitArray at the specified index.

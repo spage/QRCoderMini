@@ -21,7 +21,7 @@ public static partial class QRCodeGenerator
     public static QRCodeData GenerateQrCode(string plainText)
     {
         // Create data segment from plain text
-        DataSegment segment = new AlphanumericDataSegment(plainText);
+        var segment = new AlphanumericDataSegment(plainText);
 
         // Build the complete bit array for the determined version
         var completeBitArray = segment.ToBitArray();
@@ -199,19 +199,17 @@ public static partial class QRCodeGenerator
             var qr = new QRCodeData();
             var size = qr.ModuleMatrix.Count;
             var tempBitArray = new BitArray(18); // version string requires 18 bits
-            using (var blockedModules = new ModulePlacer.BlockedModules(size))
-            {
-                ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
-                ModulePlacer.ReserveSeperatorAreas(size, blockedModules);
-                ModulePlacer.PlaceAlignmentPatterns(qr, blockedModules);
-                ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
-                ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
-                ModulePlacer.ReserveVersionAreas(size, blockedModules);
-                ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
-                var maskVersion = ModulePlacer.MaskCode(qr, blockedModules);
-                GetFormatString(tempBitArray, maskVersion);
-                ModulePlacer.PlaceFormat(qr, tempBitArray, false);
-            }
+            var blockedModules = new ModulePlacer.BlockedModules(size);
+            ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
+            ModulePlacer.ReserveSeperatorAreas(size, blockedModules);
+            ModulePlacer.PlaceAlignmentPatterns(qr, blockedModules);
+            ModulePlacer.PlaceTimingPatterns(qr, blockedModules);
+            ModulePlacer.PlaceDarkModule(qr, 2, blockedModules);
+            ModulePlacer.ReserveVersionAreas(size, blockedModules);
+            ModulePlacer.PlaceDataWords(qr, interleavedData, blockedModules);
+            var maskVersion = ModulePlacer.MaskCode(qr, blockedModules);
+            GetFormatString(tempBitArray, maskVersion);
+            ModulePlacer.PlaceFormat(qr, tempBitArray, false);
 
             return qr;
         }

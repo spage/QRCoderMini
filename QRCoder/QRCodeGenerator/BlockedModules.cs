@@ -9,11 +9,9 @@ public partial class QRCodeGenerator
         /// <summary>
         /// Struct that represents blocked modules using rectangles.
         /// </summary>
-        public struct BlockedModules : IDisposable
+        public struct BlockedModules
         {
             private readonly BitArray[] blockedModules;
-
-            private static BitArray[]? staticBlockedModules;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="BlockedModules"/> struct with a specified size.
@@ -21,21 +19,10 @@ public partial class QRCodeGenerator
             /// <param name="size">The size of the blocked modules matrix.</param>
             public BlockedModules(int size)
             {
-                blockedModules = Interlocked.Exchange(ref staticBlockedModules, null)!;
-                if (blockedModules != null && blockedModules.Length >= size)
+                blockedModules = new BitArray[size];
+                for (var i = 0; i < size; i++)
                 {
-                    for (var i = 0; i < size; i++)
-                    {
-                        blockedModules[i].SetAll(false);
-                    }
-                }
-                else
-                {
-                    blockedModules = new BitArray[size];
-                    for (var i = 0; i < size; i++)
-                    {
-                        blockedModules[i] = new BitArray(size);
-                    }
+                    blockedModules[i] = new BitArray(size);
                 }
             }
 
@@ -83,9 +70,6 @@ public partial class QRCodeGenerator
 
                 return false;
             }
-
-            public readonly void Dispose()
-                => Interlocked.CompareExchange(ref staticBlockedModules, blockedModules, null);
         }
     }
 }
