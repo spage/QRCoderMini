@@ -29,55 +29,44 @@ public class QRCodeData : IDisposable
     }
 
     /// <summary>
-    /// Gets the raw data of the QR code with the specified compression mode.
+    /// Gets the raw data of the QR code.
     /// </summary>
-    /// <param name="compressMode">The compression mode used for the raw data.</param>
     /// <returns>Returns the raw data of the QR code as a byte array.</returns>
     public byte[] GetRawData()
     {
-        using var output = new MemoryStream();
-        Stream targetStream = output;
+        var totalModules = ModuleMatrix.Count * ModuleMatrix.Count;
+        var byteCount = (totalModules + 7) / 8; // Round up to nearest byte
+        var result = new byte[byteCount];
 
-        try
+        var bitIndex = 0;
+        byte currentByte = 0;
+        var byteIndex = 0;
+
+        foreach (BitArray row in ModuleMatrix)
         {
-            // Build data queue
-            var capacity = (ModuleMatrix.Count * ModuleMatrix.Count) + 7; // Total modules + max padding for byte alignment
-            var dataQueue = new Queue<int>(capacity);
-            foreach (BitArray row in ModuleMatrix)
+            for (var i = 0; i < row.Length; i++)
             {
-                for (var i = 0; i < row.Length; i++)
+                if (row[i])
                 {
-                    dataQueue.Enqueue(row[i] ? 1 : 0);
-                }
-            }
-
-            var mod = (int)((uint)ModuleMatrix.Count * (uint)ModuleMatrix.Count % 8);
-            for (var i = 0; i < 8 - mod; i++)
-            {
-                dataQueue.Enqueue(0);
-            }
-
-            // Process queue
-            while (dataQueue.Count > 0)
-            {
-                byte b = 0;
-                for (var i = 7; i >= 0; i--)
-                {
-                    b += (byte)(dataQueue.Dequeue() << i);
+                    currentByte |= (byte)(1 << (7 - (bitIndex % 8)));
                 }
 
-                targetStream.WriteByte(b);
-            }
-        }
-        finally
-        {
-            if (targetStream != output)
-            {
-                targetStream.Dispose();
+                bitIndex++;
+                if (bitIndex % 8 == 0)
+                {
+                    result[byteIndex++] = currentByte;
+                    currentByte = 0;
+                }
             }
         }
 
-        return output.ToArray();
+        // Write final partial byte if needed
+        if (bitIndex % 8 != 0)
+        {
+            result[byteIndex] = currentByte;
+        }
+
+        return result;
     }
 
     /// <summary>

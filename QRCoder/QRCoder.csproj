@@ -4,6 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    
+    <!-- Optimizations for smaller assembly size when used in trimmed applications -->
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    
+    <!-- AOT-ready (optional, for future AWS Lambda improvements) -->
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
   <!-- Enable .NET analyzers and set analysis level to latest to surface code-quality warnings -->

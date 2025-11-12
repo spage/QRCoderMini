@@ -1,6 +1,5 @@
 ﻿using System.Buffers;
 using System.Collections;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace QRCoder;
@@ -8,16 +7,8 @@ namespace QRCoder;
 /// <summary>
 /// Provides functionality to generate QR code data that can be used to create QR code images.
 /// </summary>
-public partial class QRCodeGenerator : IDisposable
+public static partial class QRCodeGenerator
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QRCodeGenerator"/> class.
-    /// Initializes the QR code generator.
-    /// </summary>
-    public QRCodeGenerator()
-    {
-    }
-
     /// <summary>
     /// Calculates the QR code data which than can be used in one of the rendering classes to generate a graphical representation.
     /// </summary>
@@ -73,6 +64,7 @@ public partial class QRCodeGenerator : IDisposable
         // fills the bit array with a repeating pattern to reach the required length
         void PadData()
         {
+            // Version 2, ECC Level M: 28 codewords = 224 bits of data capacity
             var dataLength = 28 * 8;
             var lengthDiff = dataLength - bitArray.Length;
             if (lengthDiff > 0)
@@ -110,9 +102,10 @@ public partial class QRCodeGenerator : IDisposable
 
         List<CodewordBlock> CalculateECCBlocks()
         {
+            // Version 2, ECC Level M: 1 block, 28 data codewords, 16 ECC codewords
             List<CodewordBlock> codewordBlocks;
 
-            // Generate the generator polynomial using the number of ECC words.
+            // Generate the generator polynomial using 16 ECC words (hardcoded for Version 2, ECC Level M)
             using (Polynom generatorPolynom = CalculateGeneratorPolynom(16))
             {
                 // Calculate error correction words
@@ -665,9 +658,4 @@ public partial class QRCodeGenerator : IDisposable
             return buffer[..idx];
         }
     }
-
-    /// <inheritdoc cref="IDisposable.Dispose"/>
-    public virtual void Dispose() =>
-        // left for back-compat
-        GC.SuppressFinalize(this);
 }
