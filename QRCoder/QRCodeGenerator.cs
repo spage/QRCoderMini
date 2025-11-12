@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Runtime.CompilerServices;
 
 namespace QRCoder;
 
@@ -197,9 +196,8 @@ public static partial class QRCodeGenerator
         {
             // NOTE: qr HAS NO BORDER NOW
             var qr = new QRCodeData();
-            var size = qr.ModuleMatrix.Count;
             var tempBitArray = new BitArray(18); // version string requires 18 bits
-            var blockedModules = new ModulePlacer.BlockedModules(size);
+            var blockedModules = new ModulePlacer.BlockedModules(25);
             ModulePlacer.PlaceFinderPatterns(qr, blockedModules);
             ModulePlacer.ReserveSeperatorAreas(blockedModules);
             ModulePlacer.PlaceAlignmentPatterns(qr, blockedModules);
@@ -264,7 +262,6 @@ public static partial class QRCodeGenerator
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void TrimLeadingZeros(BitArray fStrEcc, ref int index, ref int count)
     {
         while (count > 0 && !fStrEcc[index])

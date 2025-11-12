@@ -20,11 +20,10 @@ public class QRCodeData
     public QRCodeData()
     {
         Version = 2;
-        var size = 25;
-        ModuleMatrix = new List<BitArray>(size);
-        for (var i = 0; i < size; i++)
+        ModuleMatrix = new List<BitArray>(25);
+        for (var i = 0; i < 25; i++)
         {
-            ModuleMatrix.Add(new BitArray(size));
+            ModuleMatrix.Add(new BitArray(25));
         }
     }
 
